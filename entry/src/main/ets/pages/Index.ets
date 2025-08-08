@@ -24,6 +24,7 @@ function initData(){
 struct Index {
   @State sidebarOpen:boolean = false
   @State currentTab:number = 0
+  pageInfos:NavPathStack = new NavPathStack()
 
   @Builder
   TabBarBuilder(params:Partial<ITabBarParams>){
@@ -32,85 +33,99 @@ struct Index {
       .borderRadius(20)
   }
   build() {
-   Stack(){
-     SideBarContainer(SideBarContainerType.Overlay){
-        Column(){
-          List(){
+    Navigation(this.pageInfos){
+      Stack(){
+        SideBarContainer(SideBarContainerType.Overlay){
+          Column(){
+            List(){
 
-            ListItem(){
-              Row(){
+              ListItem(){
                 Row(){
-                  SymbolGlyph($r('sys.symbol.list_square'))
-                  Blank()
-                  Text('全部备忘')
+                  Row(){
+                    SymbolGlyph($r('sys.symbol.list_square'))
+                    Blank()
+                    Text('全部备忘')
+                  }
+                  Text('0')
                 }
-                Text('0')
-              }
-              .justifyContent(FlexAlign.SpaceBetween)
-              .width('100%')
+                .justifyContent(FlexAlign.SpaceBetween)
+                .width('100%')
 
 
-            }.border({
-              width:{
-                bottom: 1
-              },
-              color: '#dedede'
+              }.border({
+                width:{
+                  bottom: 1
+                },
+                color: '#dedede'
+              })
+              .padding({
+                top:10,
+                bottom:10,
+                left:20,
+                right:20
+              })
+            }.margin({top:100})
+          }.height('100%').backgroundColor('#fff')
+          Column(){
+            Tabs(){
+              ForEach(initData(),(item:ITabBarParams)=>{
+                TabContent(){
+                  if(item.type==TabBarEnum.MEMO){
+                    MemoView()
+                  }else {
+                    TodoView()
+                  }
+                }.tabBar(this.TabBarBuilder({text:item.text,index:item.index}))
+
+
+              })
+
+            }.barWidth(150)
+            .onChange((value)=>{
+              this.currentTab = value
             })
-            .padding({
-              top:10,
-              bottom:10,
-              left:20,
-              right:20
-            })
-          }.margin({top:100})
-        }.height('100%').backgroundColor('#fff')
-        Column(){
-          Tabs(){
-            ForEach(initData(),(item:ITabBarParams)=>{
-              TabContent(){
-                if(item.type==TabBarEnum.MEMO){
-                  MemoView()
-                }else {
-                  TodoView()
+            SymbolGlyph($r('sys.symbol.house_setting'))
+              .position({top:15,right:20})
+              .fontSize(25)
+              .bindMenu([
+                {
+                  value: '设置',
+                  action:()=>{
+                    //
+                  }
                 }
-              }.tabBar(this.TabBarBuilder({text:item.text,index:item.index}))
+              ])
+            Row(){
+              SymbolGlyph($r('sys.symbol.plus_circle'))
+                .fontSize(30)
+                .onClick(()=>{
+                  this.pageInfos.pushPath({
+                    name: 'CreateMemo'
+                  })
+                })
+            }.width('100%')
+            .justifyContent(FlexAlign.Center)
+            .position({bottom:20,left:0,right:0})
+          }.height('100%').width('100%').backgroundColor('#f3f3f3')
 
+        }
+        .showSideBar(this.sidebarOpen).showControlButton(false)
 
+        SymbolGlyph(this.sidebarOpen? $r('sys.symbol.open_sidebar'):$r('sys.symbol.close_sidebar'))
+          .position({top:15,left:20})
+          .fontSize(25)
+          .onClick(()=>{
+            animateTo({
+              duration:200
+            },()=>{
+              this.sidebarOpen=!this.sidebarOpen
             })
-
-          }.barWidth(150)
-          .onChange((value)=>{
-            this.currentTab = value
           })
-          SymbolGlyph($r('sys.symbol.house_setting'))
-            .position({top:15,right:20})
-            .fontSize(25)
-            .bindMenu([
-              {
-                value: '设置',
-                action:()=>{
-                  //
-                }
-              }
-            ])
-        }.height('100%').width('100%').backgroundColor('#f3f3f3')
 
-     }
-     .showSideBar(this.sidebarOpen).showControlButton(false)
+      }
+      .height('100%')
+      .width('100%')
+    }.hideToolBar(true)
 
-     SymbolGlyph(this.sidebarOpen? $r('sys.symbol.open_sidebar'):$r('sys.symbol.close_sidebar'))
-       .position({top:15,left:20})
-       .fontSize(25)
-       .onClick(()=>{
-       animateTo({
-         duration:200
-       },()=>{
-         this.sidebarOpen=!this.sidebarOpen
-       })
-     })
-
-   }
-    .height('100%')
-    .width('100%')
   }
 }

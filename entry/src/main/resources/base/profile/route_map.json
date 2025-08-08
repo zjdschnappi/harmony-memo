@@ -1,0 +1,12 @@
+{
+  "routerMap": [
+    {
+      "name": "CreateMemo",
+      "pageSourceFile": "src/main/ets/pages/CreateMemo.ets",
+      "buildFunction": "CreateMemoBuilder",
+      "data": {
+        "description" : "新建备忘"
+      }
+    }
+  ]
+}
