@@ -1,5 +1,7 @@
 import MemoView from '../components/MemoView';
 import TodoView from '../components/TodoView';
+import { MemoItemModel } from '../model/MemoItemModel';
+import { IMemoRouteParam } from '../types';
 
 enum TabBarEnum {
   TODO = 'TODO',
@@ -22,6 +24,7 @@ function initData(){
 @Entry
 @Component
 struct Index {
+  @Provide list: MemoItemModel[] = []
   @State sidebarOpen:boolean = false
   @State currentTab:number = 0
   pageInfos:NavPathStack = new NavPathStack()
@@ -71,7 +74,7 @@ struct Index {
               ForEach(initData(),(item:ITabBarParams)=>{
                 TabContent(){
                   if(item.type==TabBarEnum.MEMO){
-                    MemoView()
+                    MemoView({pageInfos:this.pageInfos})
                   }else {
                     TodoView()
                   }
@@ -99,9 +102,8 @@ struct Index {
               SymbolGlyph($r('sys.symbol.plus_circle'))
                 .fontSize(30)
                 .onClick(()=>{
-                  this.pageInfos.pushPath({
-                    name: 'CreateMemo'
-                  })
+                  const params:IMemoRouteParam= {id:'-1'}
+                  this.pageInfos.pushPathByName('CreateMemo',params)
                 })
             }.width('100%')
             .justifyContent(FlexAlign.Center)
