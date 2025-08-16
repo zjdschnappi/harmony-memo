@@ -1,4 +1,7 @@
 import { KeyboardAvoidMode } from "@ohos.arkui.UIContext";
+import { MemoItemModel } from "../model/MemoItemModel";
+import { IColorItemParams, IMemoRouteParam, ITextColorItem, ITextDecoratorItem, ITypingStyleParam } from "../types";
+import { formatDate } from "../utils/DateUtil";
 
 @Builder
 export function CreateMemoBuilder(){
@@ -6,23 +9,19 @@ export function CreateMemoBuilder(){
 }
 
 @Extend(Text)
-function IconText(opacity:number = 1){
+function IconText(enabled:boolean = true){
   .fontSize(26)
   .width(40)
   .height(40)
-  .opacity(opacity)
+  .enabled(enabled)
+  .opacity(enabled?1:0.1)
   .backgroundColor('#dfdfdf')
   .borderRadius('50%')
   .textAlign(TextAlign.Center)
 }
 
-interface ColorItemParams {
-  color:Color
-  onClick:(item:Color)=>void
-  active?:boolean
-}
 @Builder
-function colorItem(params:ColorItemParams){
+function colorItem(params:IColorItemParams){
 
   SymbolGlyph($r('sys.symbol.smallcircle_filled_circle'))
     .backgroundColor(params.color)
@@ -34,20 +33,10 @@ function colorItem(params:ColorItemParams){
 }
 
 
-interface ITextDecoratorItem{
-  icon: Resource;
-  onClick:()=>void;
-  active?:boolean;
-}
-interface ITextColorItem{
-  color: Color;
-}
-interface ITypingStyleParam{
-  textColor?: Color;
-  fontSize?: number;
-  isBold?: boolean;
-  isItalic?: boolean;
-  isUnderline?: boolean;
+let index = 0
+function getMemoId(){
+  index++
+  return String(index)
 }
 
 @Preview
@@ -56,6 +45,9 @@ struct CreateMemo {
   pageInfos:NavPathStack = new NavPathStack()
   controller: RichEditorController = new RichEditorController();
   options: RichEditorOptions = { controller: this.controller };
+  pageParams:IMemoRouteParam ={id:'-1'}
+  @Consume list:MemoItemModel[]
+  @State memoTitle:string = '标题'
   @State fontSize:number = 16
   @State showToolBar:boolean = false
   @State isBold:boolean = false
@@ -238,6 +230,26 @@ struct CreateMemo {
     ]
     return list
   }
+  handleSubmit(){
+    //
+    let title = this.memoTitle;
+    let spans = this.controller.getSpans();
+    let firstContent = (spans[0] as RichEditorTextSpanResult)?.value
+    let firstImgUrl = (spans[0] as RichEditorImageSpanResult)?.valueResourceStr
+    let memoId = this.pageParams.id
+    let time = formatDate(new Date(),'YYYY-MM-DD HH:mm:ss')
+
+    if(memoId == '-1'){
+      this.list.push(new MemoItemModel(getMemoId(),this.memoTitle,firstContent,time,firstImgUrl?[firstImgUrl]:[]))
+
+    }else {
+      let index = this.list.findIndex(item=>item.id == memoId)
+      if(index>-1){
+        this.list[index] = new MemoItemModel(memoId,this.memoTitle,firstContent,time,firstImgUrl?[firstImgUrl]:[])
+      }
+    }
+    this.pageInfos.pop()
+  }
   aboutToAppear(): void {
     this.getUIContext().setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE)
   }
@@ -256,16 +268,16 @@ struct CreateMemo {
         Row({space: 10}){
           Text(){
             SymbolSpan($r('sys.symbol.undo'))
-          }.IconText(0.1)
+          }.IconText(false)
           Text(){
             SymbolSpan($r('sys.symbol.redo'))
-          }.IconText(0.1)
+          }.IconText(false)
           Text(){
             SymbolSpan($r('sys.symbol.checkmark'))
-          }.IconText(0.1)
+          }.IconText(true).onClick(()=>{
+            this.handleSubmit()
+          })
         }
-
-
       }
       .justifyContent(FlexAlign.SpaceBetween)
       .padding({left:15,right:15})
@@ -276,6 +288,9 @@ struct CreateMemo {
         TextInput({
           placeholder:'标题',
         })
+          .onChange((v)=>{
+            this.memoTitle = v
+          })
           .placeholderFont({
             size: 30
           })
@@ -327,6 +342,8 @@ struct CreateMemo {
       }.width('100%').height(40)
     }.onReady((ctx)=>{
       this.pageInfos = ctx.pathStack
+      this.pageParams = ctx.pathInfo.param as IMemoRouteParam
+
     })
     .height('100%')
     .hideTitleBar(true)
