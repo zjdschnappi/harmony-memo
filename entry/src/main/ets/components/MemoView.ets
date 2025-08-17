@@ -1,17 +1,17 @@
-import { MemoItemModel } from "../model/MemoItemModel"
+import { MemoSimpleListItemModel } from "../model/Memo"
 import { IMemoRouteParam } from "../types"
-
+import MemoViewModel from '../viewmodel/MemoViewModel'
 
 @Component
 struct  MemoItem {
-  @ObjectLink item: MemoItemModel
-  click: (item:MemoItemModel)=>void = ()=>{}
+  @ObjectLink item: MemoSimpleListItemModel
+  click: (item:MemoSimpleListItemModel)=>void = ()=>{}
   build(){
     Column(){
       Text(this.item.title).fontSize(18).fontWeight(700)
       Row(){
-        Text(this.item.content).fontSize(16)
-        Text(this.item.time).fontSize(12)
+        Text(this.item.simpleContent).fontSize(16)
+        Text(this.item.modifiedTime).fontSize(12)
       }.justifyContent(FlexAlign.SpaceBetween).width('100%')
     }.width('100%').alignItems(HorizontalAlign.Start).border({
       width:{
@@ -28,7 +28,7 @@ struct  MemoItem {
 
 @Component
 export default struct MemoView {
-  @Consume list: MemoItemModel[]
+  @Consume list: MemoSimpleListItemModel[]
   pageInfos:NavPathStack = new NavPathStack()
   @Builder
   deleteItemBuilder(id:string){
@@ -46,15 +46,25 @@ export default struct MemoView {
 
         }).then((value)=>{
           if(value.index==1){
-            this.list = this.list.filter(item=>item.id!==id)
+           //
+            MemoViewModel.deleteMemo(id).then(()=>{
+               this.getMemoList()
+            })
           }
         })
 
       })
   }
-  handleDetail(item:MemoItemModel){
-    let params:IMemoRouteParam = {id:item.id}
-    this.pageInfos.pushPathByName('CreateMemo',params)
+  getMemoList(){
+    MemoViewModel.getActiveMemos().then((data)=>{
+      this.list = data
+    })
+  }
+  handleDetail(item:MemoSimpleListItemModel){
+    let params:IMemoRouteParam = {id:item.memoId}
+    this.pageInfos.pushPathByName('CreateMemo',params,()=>{
+      this.getMemoList()
+    })
   }
 
   build(){
@@ -62,13 +72,13 @@ export default struct MemoView {
     if(this.list.length){
 
       List(){
-        ForEach(this.list,(item:MemoItemModel)=>{
+        ForEach(this.list,(item:MemoSimpleListItemModel)=>{
           ListItem(){
             MemoItem({item:item,click:(detail)=>{
                 this.handleDetail(detail)
             }})
           }.swipeAction({
-            end: this.deleteItemBuilder(item.id)
+            end: this.deleteItemBuilder(item.memoId)
           })
 
         })

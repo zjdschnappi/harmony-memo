@@ -1,6 +1,7 @@
 import MemoView from '../components/MemoView';
 import TodoView from '../components/TodoView';
-import { MemoItemModel } from '../model/MemoItemModel';
+import MemoViewModel from '../viewmodel/MemoViewModel'
+import {  MemoSimpleListItemModel } from '../model/Memo';
 import { IMemoRouteParam } from '../types';
 
 enum TabBarEnum {
@@ -24,7 +25,7 @@ function initData(){
 @Entry
 @Component
 struct Index {
-  @Provide list: MemoItemModel[] = []
+  @Provide list: MemoSimpleListItemModel[] = []
   @State sidebarOpen:boolean = false
   @State currentTab:number = 0
   pageInfos:NavPathStack = new NavPathStack()
@@ -34,6 +35,27 @@ struct Index {
     Text(params.text).backgroundColor(this.currentTab==params.index?'#dedede':'transparent')
       .padding({top:10,left:20,right:20,bottom:10})
       .borderRadius(20)
+  }
+
+  getMemoList(){
+    MemoViewModel.getActiveMemos().then((data)=>{
+      this.list = data
+
+      //   .map(item=>{
+      //   return new MemoSimpleListItemModel(
+      //     item.memoId,
+      //     item.title,
+      //     item.simpleContent,
+      //     item.createdTime,
+      //     item.modifiedTime,
+      //     item.imgUrl
+      //   )
+      // })
+    })
+  }
+
+  onPageShow() {
+    this.getMemoList()
   }
   build() {
     Navigation(this.pageInfos){
@@ -49,7 +71,7 @@ struct Index {
                     Blank()
                     Text('全部备忘')
                   }
-                  Text('0')
+                  Text(String(this.list.length))
                 }
                 .justifyContent(FlexAlign.SpaceBetween)
                 .width('100%')
@@ -103,7 +125,9 @@ struct Index {
                 .fontSize(30)
                 .onClick(()=>{
                   const params:IMemoRouteParam= {id:'-1'}
-                  this.pageInfos.pushPathByName('CreateMemo',params)
+                  this.pageInfos.pushPathByName('CreateMemo',params,(info)=>{
+                    this.getMemoList()
+                  })
                 })
             }.width('100%')
             .justifyContent(FlexAlign.Center)

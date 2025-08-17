@@ -1,7 +1,8 @@
 import { KeyboardAvoidMode } from "@ohos.arkui.UIContext";
-import { MemoItemModel } from "../model/MemoItemModel";
+import MemoViewModel from '../viewmodel/MemoViewModel'
 import { IColorItemParams, IMemoRouteParam, ITextColorItem, ITextDecoratorItem, ITypingStyleParam } from "../types";
 import { formatDate } from "../utils/DateUtil";
+import { IMemoContentItem, IMemoDetailModel } from "../model/Memo";
 
 @Builder
 export function CreateMemoBuilder(){
@@ -46,7 +47,6 @@ struct CreateMemo {
   controller: RichEditorController = new RichEditorController();
   options: RichEditorOptions = { controller: this.controller };
   pageParams:IMemoRouteParam ={id:'-1'}
-  @Consume list:MemoItemModel[]
   @State memoTitle:string = '标题'
   @State fontSize:number = 16
   @State showToolBar:boolean = false
@@ -230,28 +230,25 @@ struct CreateMemo {
     ]
     return list
   }
-  handleSubmit(){
+  async handleSubmit(){
     //
     let title = this.memoTitle;
     let spans = this.controller.getSpans();
-    let firstContent = (spans[0] as RichEditorTextSpanResult)?.value
-    let firstImgUrl = (spans[0] as RichEditorImageSpanResult)?.valueResourceStr
+
     let memoId = this.pageParams.id
-    let time = formatDate(new Date(),'YYYY-MM-DD HH:mm:ss')
 
     if(memoId == '-1'){
-      this.list.push(new MemoItemModel(getMemoId(),this.memoTitle,firstContent,time,firstImgUrl?[firstImgUrl]:[]))
+      await MemoViewModel.createMemo(title,spans)
 
     }else {
-      let index = this.list.findIndex(item=>item.id == memoId)
-      if(index>-1){
-        this.list[index] = new MemoItemModel(memoId,this.memoTitle,firstContent,time,firstImgUrl?[firstImgUrl]:[])
-      }
+     //
+      await MemoViewModel.updateMemo(memoId,title,spans)
     }
-    this.pageInfos.pop()
+    this.pageInfos.pop({result:null})
   }
   aboutToAppear(): void {
     this.getUIContext().setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE)
+
   }
   build() {
     //
@@ -287,13 +284,13 @@ struct CreateMemo {
       Column(){
         TextInput({
           placeholder:'标题',
+          text: $$this.memoTitle
         })
-          .onChange((v)=>{
-            this.memoTitle = v
-          })
+
           .placeholderFont({
             size: 30
           })
+
           .defaultFocus(true)
           .caretColor(Color.Orange)
           .fontSize(30)
@@ -343,7 +340,20 @@ struct CreateMemo {
     }.onReady((ctx)=>{
       this.pageInfos = ctx.pathStack
       this.pageParams = ctx.pathInfo.param as IMemoRouteParam
+      MemoViewModel.getDetailById(this.pageParams.id).then((data)=>{
 
+        this.memoTitle = data?.title||''
+        data?.content?.forEach((item:IMemoContentItem)=>{
+          if(typeof (item as RichEditorImageSpanResult).valueResourceStr!='undefined'){
+
+          }else {
+            let content = item as RichEditorTextSpanResult
+            this.controller.addTextSpan(content.value,{
+              style: content.textStyle
+            })
+          }
+        })
+      })
     })
     .height('100%')
     .hideTitleBar(true)
