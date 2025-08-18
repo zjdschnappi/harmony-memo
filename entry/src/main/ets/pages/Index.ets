@@ -26,6 +26,7 @@ function initData(){
 @Component
 struct Index {
   @Provide list: MemoSimpleListItemModel[] = []
+  @StorageProp('dbInitialized') @Watch('dbInit') storageProp:boolean = false
   @State sidebarOpen:boolean = false
   @State currentTab:number = 0
   pageInfos:NavPathStack = new NavPathStack()
@@ -36,21 +37,12 @@ struct Index {
       .padding({top:10,left:20,right:20,bottom:10})
       .borderRadius(20)
   }
-
+  dbInit(){
+    this.getMemoList()
+  }
   getMemoList(){
     MemoViewModel.getActiveMemos().then((data)=>{
       this.list = data
-
-      //   .map(item=>{
-      //   return new MemoSimpleListItemModel(
-      //     item.memoId,
-      //     item.title,
-      //     item.simpleContent,
-      //     item.createdTime,
-      //     item.modifiedTime,
-      //     item.imgUrl
-      //   )
-      // })
     })
   }
 
@@ -125,9 +117,7 @@ struct Index {
                 .fontSize(30)
                 .onClick(()=>{
                   const params:IMemoRouteParam= {id:'-1'}
-                  this.pageInfos.pushPathByName('CreateMemo',params,(info)=>{
-                    this.getMemoList()
-                  })
+                  this.pageInfos.pushPathByName('CreateMemo',params)
                 })
             }.width('100%')
             .justifyContent(FlexAlign.Center)
