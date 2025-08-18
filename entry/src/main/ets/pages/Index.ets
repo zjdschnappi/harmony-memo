@@ -117,7 +117,9 @@ struct Index {
                 .fontSize(30)
                 .onClick(()=>{
                   const params:IMemoRouteParam= {id:'-1'}
-                  this.pageInfos.pushPathByName('CreateMemo',params)
+                  this.pageInfos.pushPathByName('CreateMemo',params,()=>{
+                    this.getMemoList()
+                  })
                 })
             }.width('100%')
             .justifyContent(FlexAlign.Center)
