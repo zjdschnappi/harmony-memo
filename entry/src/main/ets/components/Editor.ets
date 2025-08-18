@@ -24,6 +24,7 @@ export struct Editor {
   @State isItalic:boolean = false
   @State isUnderline:boolean = false
   @State textColor:Color = Color.Black
+  @State selectionRange: RichEditorRange = {start:0,end:0}
 
   @Builder
   toolbarBuilder(){
@@ -58,7 +59,17 @@ export struct Editor {
         ForEach(this.colorItems(),(item:ITextColorItem)=>{
           colorItem({color:item.color,onClick:(item:Color)=>{
             this.textColor = item
-            this.editorOptions.controller.setTypingStyle(this.getTypingStyles({textColor:item}))
+            if((this.selectionRange.start||0)<(this.selectionRange.end||0)){
+              this.editorOptions.controller.updateSpanStyle({
+                start: this.selectionRange.start,
+                end: this.selectionRange.end,
+                textStyle:this.getTypingStyles({textColor:item})
+              })
+            }else {
+              this.editorOptions.controller.setTypingStyle(this.getTypingStyles({textColor:item}))
+
+            }
+
           },
             active: this.textColor==item.color
           })
@@ -75,7 +86,16 @@ export struct Editor {
         })
           .onChange((v)=>{
             this.fontSize = v
-            this.editorOptions.controller.setTypingStyle(this.getTypingStyles({fontSize:v}))
+            if((this.selectionRange.start||0)<(this.selectionRange.end||0)){
+              this.editorOptions.controller.updateSpanStyle({
+                start: this.selectionRange.start,
+                end: this.selectionRange.end,
+                textStyle:this.getTypingStyles({fontSize:v})
+              })
+            }else {
+              this.editorOptions.controller.setTypingStyle(this.getTypingStyles({fontSize:v}))
+            }
+
           })
           .layoutWeight(1).trackColor('#dfdfdf').selectedColor(Color.Orange)
         Text('Aa').fontSize(30).fontWeight(700)
@@ -108,7 +128,16 @@ export struct Editor {
         icon: $r('sys.symbol.pencil_line_1'),
         onClick:()=>{
           this.isUnderline=!this.isUnderline
-          this.editorOptions.controller.setTypingStyle(this.getTypingStyles({isUnderline:this.isUnderline}))
+          if((this.selectionRange.start||0)<(this.selectionRange.end||0)){
+            this.editorOptions.controller.updateSpanStyle({
+              start: this.selectionRange.start,
+              end: this.selectionRange.end,
+              textStyle: this.getTypingStyles({isUnderline:this.isUnderline})
+            })
+          }else {
+            this.editorOptions.controller.setTypingStyle(this.getTypingStyles({isUnderline:this.isUnderline}))
+          }
+
         },
         active: this.isUnderline
       },
@@ -116,7 +145,16 @@ export struct Editor {
         icon: $r('sys.symbol.character_viewfinder'),
         onClick:()=>{
           this.isBold = !this.isBold
-          this.editorOptions.controller.setTypingStyle(this.getTypingStyles({isBold:this.isBold}))
+          if((this.selectionRange.start||0)<(this.selectionRange.end||0)){
+            this.editorOptions.controller.updateSpanStyle({
+              start: this.selectionRange.start,
+              end: this.selectionRange.end,
+              textStyle:this.getTypingStyles({isBold:this.isBold})
+            })
+          }else {
+            this.editorOptions.controller.setTypingStyle(this.getTypingStyles({isBold:this.isBold}))
+          }
+
         },
         active: this.isBold
       },
@@ -124,7 +162,11 @@ export struct Editor {
         icon: $r('sys.symbol.selector'),
         onClick:()=>{
           this.isItalic = !this.isItalic
-          this.editorOptions.controller.setTypingStyle(this.getTypingStyles({isItalic:this.isItalic}))
+          this.editorOptions.controller.updateSpanStyle({
+            start: this.selectionRange.start,
+            end: this.selectionRange.end,
+            textStyle: this.getTypingStyles({isItalic:this.isItalic})
+          })
         },
         active: this.isItalic
       },
@@ -200,6 +242,43 @@ export struct Editor {
     ]
     return list
   }
+  // 获取选中区域的格式从而高亮工具栏
+  setSelectionRangeState(v:RichEditorRange){
+    let spans = this.editorOptions.controller.getSpans({start:v.start,end:v.end});
+    let fontSizeSet:Set<number> = new Set()
+    let fontColorSet:Set<ResourceColor> = new Set()
+    let fontStyleSet:Set<FontStyle> = new Set()
+    let fontWeightSet:Set<number> = new Set()
+
+    spans.forEach((item)=>{
+      let span = item as RichEditorImageSpanResult
+      if(typeof span.imageStyle!=='undefined'){
+        //
+      }else {
+       let span = item as RichEditorTextSpanResult;
+        fontSizeSet.add(span.textStyle.fontSize)
+        fontColorSet.add(span.textStyle.fontColor)
+        fontStyleSet.add(span.textStyle.fontStyle)
+        fontWeightSet.add(span.textStyle.fontWeight)
+
+      }
+      if(fontSizeSet.size==1){
+        this.fontSize = fontSizeSet.values().next().value
+      }
+      if(fontColorSet.size==1){
+        this.textColor = fontColorSet.values().next().value
+
+      }
+      if(fontWeightSet.size==1){
+        this.isBold = fontWeightSet.values().next().value == FontWeight.Bold
+
+      }
+      if(fontStyleSet.size==1){
+        this.isItalic = fontStyleSet.values().next().value == FontStyle.Italic
+      }
+
+    })
+  }
   build(){
 
     Column(){
@@ -209,8 +288,13 @@ export struct Editor {
         .height('100%')
         .caretColor(Color.Orange)
         .onReady(() => {
+
           //
         }).layoutWeight(1)
+        .onSelectionChange(v=>{
+          this.selectionRange = v
+          this.setSelectionRangeState(v)
+        })
 
       Row(){
         List({space:20}){
