@@ -29,6 +29,7 @@ struct  MemoItem {
 @Component
 export default struct MemoView {
   @Consume list: MemoSimpleListItemModel[]
+  scroller:ListScroller = new ListScroller()
   pageInfos:NavPathStack = new NavPathStack()
   @Builder
   deleteItemBuilder(id:string){
@@ -50,6 +51,8 @@ export default struct MemoView {
             MemoViewModel.deleteMemo(id).then(()=>{
                this.getMemoList()
             })
+          }else {
+            this.scroller.closeAllSwipeActions()
           }
         })
 
@@ -71,7 +74,7 @@ export default struct MemoView {
     //
     if(this.list.length){
 
-      List(){
+      List({scroller:this.scroller}){
         ForEach(this.list,(item:MemoSimpleListItemModel)=>{
           ListItem(){
             MemoItem({item:item,click:(detail)=>{
