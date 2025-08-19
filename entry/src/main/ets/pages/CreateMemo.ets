@@ -117,7 +117,8 @@ struct CreateMemo {
                 fontStyle: content.textStyle.fontStyle,
 
 
-              }
+              },
+              paragraphStyle: content.paragraphStyle
             })
           }
         })

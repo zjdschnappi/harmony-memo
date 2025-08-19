@@ -8,13 +8,15 @@ const defaultColor = '#E5000000'
 @Component
 export struct Editor {
   editorOptions: RichEditorOptions = { controller: new RichEditorController() };
+  selectionRange: RichEditorRange = {start:0,end:0}
   @State fontSize:number = 16
   @State showToolBar:boolean = false
   @State isBold:boolean = false
   @State isItalic:boolean = false
   @State isUnderline:boolean = false
   @State textColor:Color|string = defaultColor
-  @State selectionRange: RichEditorRange = {start:0,end:0}
+  @State paragraphStyle:TextAlign = TextAlign.Start
+
 
 
   @Builder
@@ -181,16 +183,41 @@ export struct Editor {
         active: this.isItalic
       },
       {
-        icon: $r('sys.symbol.text_aligncenter'),
-        onClick:()=>{}
+        icon: $r('sys.symbol.text_alignleft'),
+        onClick:()=>{
+          this.paragraphStyle = TextAlign.Start
+          this.editorOptions.controller.updateParagraphStyle({
+            style: {
+              textAlign: TextAlign.Start
+            }
+          })
+        },
+        active: this.paragraphStyle == TextAlign.Start
       },
       {
-        icon: $r('sys.symbol.text_alignleft'),
-        onClick:()=>{}
+        icon: $r('sys.symbol.text_aligncenter'),
+        onClick:()=>{
+          this.paragraphStyle = TextAlign.Center
+          this.editorOptions.controller.updateParagraphStyle({
+            style: {
+              textAlign: TextAlign.Center
+            }
+          })
+        },
+        active: this.paragraphStyle == TextAlign.Center
       },
+
       {
         icon: $r('sys.symbol.text_alignright'),
-        onClick:()=>{}
+        onClick:()=>{
+          this.paragraphStyle = TextAlign.End
+          this.editorOptions.controller.updateParagraphStyle({
+            style: {
+              textAlign: TextAlign.End
+            }
+          })
+        },
+        active: this.paragraphStyle == TextAlign.End
       },
     ]
     return list
@@ -260,6 +287,7 @@ export struct Editor {
     let fontStyleSet:Set<FontStyle> = new Set()
     let fontWeightSet:Set<number> = new Set()
     let textDecorateStyleSet:Set<TextDecorationType> = new Set()
+    let paragraphTypeSet:Set<TextAlign> = new Set()
 
     spans.forEach((item)=>{
       let span = item as RichEditorImageSpanResult
@@ -272,6 +300,7 @@ export struct Editor {
         fontStyleSet.add(span.textStyle.fontStyle)
         fontWeightSet.add(span.textStyle.fontWeight)
         textDecorateStyleSet.add(span.textStyle.decoration.type)
+        paragraphTypeSet.add(span.paragraphStyle?.textAlign||TextAlign.Start)
 
       }
       if(fontSizeSet.size==1){
@@ -290,6 +319,9 @@ export struct Editor {
       }
       if(textDecorateStyleSet.size==1){
         this.isUnderline =( textDecorateStyleSet.values().next().value as TextDecorationType) ==  TextDecorationType.Underline
+      }
+      if(paragraphTypeSet.size==1){
+        this.paragraphStyle =( paragraphTypeSet.values().next().value as TextAlign)
       }
 
     })
