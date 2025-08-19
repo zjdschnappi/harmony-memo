@@ -1,19 +1,9 @@
 
 import { IColorItemParams, IMemoRouteParam, ITextColorItem, ITextDecoratorItem, ITypingStyleParam } from "../types";
 
-@Builder
-function colorItem(params:IColorItemParams){
-
-  SymbolGlyph($r('sys.symbol.smallcircle_filled_circle'))
-    .backgroundColor(params.color)
-    .renderingStrategy(SymbolRenderingStrategy.MULTIPLE_COLOR)
-    .fontColor(params.active?[Color.Transparent,Color.White]:[Color.Transparent,Color.Transparent])
-    .fontSize(26).borderRadius('50%').onClick(()=>{
-    params.onClick(params.color)
-  })
-}
 
 
+const defaultColor = '#E5000000'
 
 @Component
 export struct Editor {
@@ -23,9 +13,21 @@ export struct Editor {
   @State isBold:boolean = false
   @State isItalic:boolean = false
   @State isUnderline:boolean = false
-  @State textColor:Color = Color.Black
+  @State textColor:Color|string = defaultColor
   @State selectionRange: RichEditorRange = {start:0,end:0}
 
+
+  @Builder
+  colorItem(params:IColorItemParams){
+
+    SymbolGlyph($r('sys.symbol.smallcircle_filled_circle'))
+      .backgroundColor(params.color)
+      .renderingStrategy(SymbolRenderingStrategy.MULTIPLE_COLOR)
+      .fontColor(String(this.textColor).toLowerCase()==String(params.color).toLowerCase()?[Color.Transparent,Color.White]:[Color.Transparent,Color.Transparent])
+      .fontSize(26).borderRadius('50%').onClick(()=>{
+      params.onClick(params.color)
+    })
+  }
   @Builder
   toolbarBuilder(){
     Column(){
@@ -57,9 +59,9 @@ export struct Editor {
       Divider().width('100%')
       Row({space: 25}){
         ForEach(this.colorItems(),(item:ITextColorItem)=>{
-          colorItem({color:item.color,onClick:(item:Color)=>{
+          this.colorItem({color:item.color,onClick:(item:Color|string)=>{
             this.textColor = item
-            if((this.selectionRange.start||0)<(this.selectionRange.end||0)){
+            if(this.checkIsSelectRange()){
               this.editorOptions.controller.updateSpanStyle({
                 start: this.selectionRange.start,
                 end: this.selectionRange.end,
@@ -70,8 +72,8 @@ export struct Editor {
 
             }
 
-          },
-            active: this.textColor==item.color
+          }
+
           })
         })
       }.width('100%').height(60).justifyContent(FlexAlign.SpaceBetween)
@@ -86,13 +88,13 @@ export struct Editor {
         })
           .onChange((v)=>{
             this.fontSize = v
-            if((this.selectionRange.start||0)<(this.selectionRange.end||0)){
+            if(this.checkIsSelectRange()){
               this.editorOptions.controller.updateSpanStyle({
                 start: this.selectionRange.start,
                 end: this.selectionRange.end,
                 textStyle:this.getTypingStyles({fontSize:v})
               })
-            }else {
+            } else {
               this.editorOptions.controller.setTypingStyle(this.getTypingStyles({fontSize:v}))
             }
 
@@ -103,6 +105,9 @@ export struct Editor {
     }.margin({top: 25,bottom: 25}).padding({left: 10,right: 10})
 
 
+  }
+  checkIsSelectRange(){
+    return (this.selectionRange.start||0)<(this.selectionRange.end||0)
   }
   getTypingStyles(params:ITypingStyleParam){
     let styles:RichEditorTextStyle = {
@@ -128,7 +133,7 @@ export struct Editor {
         icon: $r('sys.symbol.pencil_line_1'),
         onClick:()=>{
           this.isUnderline=!this.isUnderline
-          if((this.selectionRange.start||0)<(this.selectionRange.end||0)){
+          if(this.checkIsSelectRange()){
             this.editorOptions.controller.updateSpanStyle({
               start: this.selectionRange.start,
               end: this.selectionRange.end,
@@ -145,7 +150,7 @@ export struct Editor {
         icon: $r('sys.symbol.character_viewfinder'),
         onClick:()=>{
           this.isBold = !this.isBold
-          if((this.selectionRange.start||0)<(this.selectionRange.end||0)){
+          if(this.checkIsSelectRange()){
             this.editorOptions.controller.updateSpanStyle({
               start: this.selectionRange.start,
               end: this.selectionRange.end,
@@ -162,11 +167,16 @@ export struct Editor {
         icon: $r('sys.symbol.selector'),
         onClick:()=>{
           this.isItalic = !this.isItalic
-          this.editorOptions.controller.updateSpanStyle({
-            start: this.selectionRange.start,
-            end: this.selectionRange.end,
-            textStyle: this.getTypingStyles({isItalic:this.isItalic})
-          })
+          if(this.checkIsSelectRange()){
+            this.editorOptions.controller.updateSpanStyle({
+              start: this.selectionRange.start,
+              end: this.selectionRange.end,
+              textStyle: this.getTypingStyles({isItalic:this.isItalic})
+            })
+          }else {
+            this.editorOptions.controller.setTypingStyle(this.getTypingStyles({isItalic:this.isItalic}))
+          }
+
         },
         active: this.isItalic
       },
@@ -217,7 +227,7 @@ export struct Editor {
   colorItems(){
     let list:ITextColorItem[] = [
       {
-        color:Color.Black,
+        color:defaultColor
       },
       {
         color:Color.Blue,
@@ -249,6 +259,7 @@ export struct Editor {
     let fontColorSet:Set<ResourceColor> = new Set()
     let fontStyleSet:Set<FontStyle> = new Set()
     let fontWeightSet:Set<number> = new Set()
+    let textDecorateStyleSet:Set<TextDecorationType> = new Set()
 
     spans.forEach((item)=>{
       let span = item as RichEditorImageSpanResult
@@ -260,6 +271,7 @@ export struct Editor {
         fontColorSet.add(span.textStyle.fontColor)
         fontStyleSet.add(span.textStyle.fontStyle)
         fontWeightSet.add(span.textStyle.fontWeight)
+        textDecorateStyleSet.add(span.textStyle.decoration.type)
 
       }
       if(fontSizeSet.size==1){
@@ -270,11 +282,14 @@ export struct Editor {
 
       }
       if(fontWeightSet.size==1){
-        this.isBold = fontWeightSet.values().next().value == FontWeight.Bold
-
+        this.isBold = fontWeightSet.values().next().value == 9
       }
+
       if(fontStyleSet.size==1){
         this.isItalic = fontStyleSet.values().next().value == FontStyle.Italic
+      }
+      if(textDecorateStyleSet.size==1){
+        this.isUnderline =( textDecorateStyleSet.values().next().value as TextDecorationType) ==  TextDecorationType.Underline
       }
 
     })

@@ -4,9 +4,8 @@ export interface IMemoRouteParam {
 }
 
 export interface IColorItemParams {
-  color:Color
-  onClick:(item:Color)=>void
-  active?:boolean
+  color:Color|string
+  onClick:(item:Color|string)=>void
 }
 
 export interface ITextDecoratorItem{
@@ -15,10 +14,10 @@ export interface ITextDecoratorItem{
   active?:boolean;
 }
 export interface ITextColorItem{
-  color: Color;
+  color: Color|string;
 }
 export interface ITypingStyleParam{
-  textColor?: Color;
+  textColor?: Color|string;
   fontSize?: number;
   isBold?: boolean;
   isItalic?: boolean;

@@ -110,7 +110,14 @@ struct CreateMemo {
           }else {
             let content = item as RichEditorTextSpanResult
             this.controller.addTextSpan(content.value,{
-              style: content.textStyle
+              style: {
+                fontColor: content.textStyle.fontColor,
+                fontWeight: content.textStyle.fontWeight==9?FontWeight.Bold:FontWeight.Normal,
+                fontSize: content.textStyle.fontSize,
+                fontStyle: content.textStyle.fontStyle,
+
+
+              }
             })
           }
         })
