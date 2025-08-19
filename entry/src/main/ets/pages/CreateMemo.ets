@@ -106,7 +106,8 @@ struct CreateMemo {
         this.memoTitle = data?.title||''
         data?.content?.forEach((item:IMemoContentItem)=>{
           if(typeof (item as RichEditorImageSpanResult).valueResourceStr!='undefined'){
-
+            let content = item as RichEditorImageSpanResult
+            this.controller.addImageSpan(content.valueResourceStr)
           }else {
             let content = item as RichEditorTextSpanResult
             this.controller.addTextSpan(content.value,{

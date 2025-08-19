@@ -1,6 +1,6 @@
 
 import { IColorItemParams, IMemoRouteParam, ITextColorItem, ITextDecoratorItem, ITypingStyleParam } from "../types";
-
+import { PhotoSelectView } from "./PhotoSelectView";
 
 
 const defaultColor = '#E5000000'
@@ -371,7 +371,9 @@ export struct Editor {
             SymbolGlyph($r('sys.symbol.face')).fontSize(30)
           }
           ListItem(){
-            SymbolGlyph($r('sys.symbol.media_center')).fontSize(30)
+            PhotoSelectView({onImgSelect:(urls)=>{
+              this.editorOptions.controller.addImageSpan(urls[0])
+            }})
           }
         }.listDirection(Axis.Horizontal).alignListItem(ListItemAlign.Center).padding({left:15,right:15})
       }.width('100%').height(40)
