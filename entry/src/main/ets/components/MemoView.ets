@@ -31,33 +31,45 @@ export default struct MemoView {
   @Consume list: MemoSimpleListItemModel[]
   scroller:ListScroller = new ListScroller()
   pageInfos:NavPathStack = new NavPathStack()
+
   @Builder
-  deleteItemBuilder(id:string){
-    Button('删除').type(ButtonType.Normal).width(80).height('100%')
-      .fontSize(14)
-      .fontColor('#fff').backgroundColor(Color.Red)
-      .onClick(()=>{
-        this.getUIContext().getPromptAction().showDialog({
-          title: '提示',
-          message:'确认删除这条记录吗？',
-          buttons:[
-            {text:'取消',primary:false,color:'black'},
-            {text:'确定',primary:true,color:'red'}
-          ],
-
-        }).then((value)=>{
-          if(value.index==1){
-           //
-            MemoViewModel.deleteMemo(id).then(()=>{
-               this.getMemoList()
-            })
-          }else {
-            this.scroller.closeAllSwipeActions()
-          }
-        })
-
+  endBuilder(id:string){
+    Row({space: 20}){
+      SymbolGlyph($r('sys.symbol.pin')).fontSize(30).fontColor([Color.Brown]).onClick(()=>{
+        this.handlePinTop(id)
       })
+      SymbolGlyph($r('sys.symbol.folder')).fontSize(30).fontColor([Color.Green])
+      SymbolGlyph($r('sys.symbol.trash')).fontSize(30).fontColor([Color.Red]).onClick(()=>{
+        this.handleDelete(id)
+      })
+    }
   }
+  handlePinTop(id:string){
+    MemoViewModel.togglePin(id).then(()=>{
+      this.getMemoList()
+    })
+  }
+  handleDelete(id:string){
+    this.getUIContext().getPromptAction().showDialog({
+      title: '提示',
+      message:'确认删除这条记录吗？',
+      buttons:[
+        {text:'取消',primary:false,color:'black'},
+        {text:'确定',primary:true,color:'red'}
+      ],
+
+    }).then((value)=>{
+      if(value.index==1){
+        //
+        MemoViewModel.deleteMemo(id).then(()=>{
+          this.getMemoList()
+        })
+      }else {
+        this.scroller.closeAllSwipeActions()
+      }
+    })
+  }
+
   getMemoList(){
     MemoViewModel.getActiveMemos().then((data)=>{
       this.list = data
@@ -81,7 +93,7 @@ export default struct MemoView {
                 this.handleDetail(detail)
             }})
           }.swipeAction({
-            end: this.deleteItemBuilder(item.memoId)
+            end: this.endBuilder(item.memoId)
           })
 
         })
