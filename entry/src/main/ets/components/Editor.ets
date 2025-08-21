@@ -1,5 +1,6 @@
 
 import { IColorItemParams, IMemoRouteParam, ITextColorItem, ITextDecoratorItem, ITypingStyleParam } from "../types";
+import { EmojiSelectView } from "./EmojiSelectView";
 import { PhotoSelectView } from "./PhotoSelectView";
 
 
@@ -368,7 +369,17 @@ export struct Editor {
               })
           }
           ListItem(){
-            SymbolGlyph($r('sys.symbol.face')).fontSize(30)
+            EmojiSelectView({
+              onEmojiSelect:(url)=>{
+                this.editorOptions.controller.addImageSpan(url, {
+                  imageStyle: {
+                    size: [30, 30], // 3.2 调整表情在输入框中的尺寸
+                    verticalAlign: ImageSpanAlignment.CENTER,
+                    layoutStyle: { margin: {right:1} }
+                  }
+                });
+              }
+            })
           }
           ListItem(){
             PhotoSelectView({onImgSelect:(urls)=>{

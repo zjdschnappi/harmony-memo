@@ -99,6 +99,7 @@ struct CreateMemo {
       }
       .width('100%').layoutWeight(1)
     }.onReady((ctx)=>{
+      let px2vp = this.getUIContext().px2vp
       this.pageInfos = ctx.pathStack
       this.pageParams = ctx.pathInfo.param as IMemoRouteParam
       MemoViewModel.getDetailById(this.pageParams.id).then((data)=>{
@@ -107,7 +108,15 @@ struct CreateMemo {
         data?.content?.forEach((item:IMemoContentItem)=>{
           if(typeof (item as RichEditorImageSpanResult).valueResourceStr!='undefined'){
             let content = item as RichEditorImageSpanResult
-            this.controller.addImageSpan(content.valueResourceStr)
+
+            this.controller.addImageSpan(content.valueResourceStr,{
+              imageStyle: {
+                size:content.imageStyle.size.map(item=>px2vp(item)) as [Dimension,Dimension],
+                layoutStyle:content.imageStyle.layoutStyle,
+                verticalAlign:content.imageStyle.verticalAlign,
+                objectFit:content.imageStyle.objectFit
+              }
+            })
           }else {
             let content = item as RichEditorTextSpanResult
             this.controller.addTextSpan(content.value,{
@@ -116,7 +125,8 @@ struct CreateMemo {
                 fontWeight: content.textStyle.fontWeight==9?FontWeight.Bold:FontWeight.Normal,
                 fontSize: content.textStyle.fontSize,
                 fontStyle: content.textStyle.fontStyle,
-
+                decoration: content.textStyle.decoration,
+                fontFeature: content.textStyle.fontFeature
 
               },
               paragraphStyle: content.paragraphStyle
