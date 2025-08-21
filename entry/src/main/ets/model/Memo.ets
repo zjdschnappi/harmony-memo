@@ -70,6 +70,8 @@ export interface IMemoSimpleListItemModel {
   createdTime: string;
   modifiedTime: string;
   imgUrl:ResourceStr[]
+  isPinned: boolean
+  isArchived: boolean
 }
 
 export interface IMemoDetailModel {
@@ -102,6 +104,8 @@ export class MemoSimpleListItemModel implements  IMemoSimpleListItemModel {
   createdTime:string
   modifiedTime: string
   imgUrl:ResourceStr[]
+  isPinned: boolean
+  isArchived: boolean
 
   constructor(
     memoId: string,
@@ -110,6 +114,8 @@ export class MemoSimpleListItemModel implements  IMemoSimpleListItemModel {
     createdTime:string,
     modifiedTime: string,
     imgUrl:ResourceStr[],
+    isPinned: boolean,
+    isArchived: boolean
   ) {
     this.memoId = memoId;
     this.simpleContent = simpleContent
@@ -117,6 +123,8 @@ export class MemoSimpleListItemModel implements  IMemoSimpleListItemModel {
     this.modifiedTime = modifiedTime;
     this.title = title;
     this.imgUrl = imgUrl
+    this.isPinned = isPinned
+    this.isArchived = isArchived
 
   }
 }

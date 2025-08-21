@@ -42,7 +42,19 @@ struct Index {
   }
   getMemoList(){
     MemoViewModel.getActiveMemos().then((data)=>{
-      this.list = data
+      this.list = data.map(item=>{
+        return new MemoSimpleListItemModel(
+          item.memoId,
+          item.title,
+          item.simpleContent,
+          item.createdTime,
+          item.modifiedTime,
+          item.imgUrl,
+          item.isPinned,
+          item.isArchived,
+        )
+
+      })
     })
   }
 
@@ -133,7 +145,7 @@ struct Index {
           .position({top:15,left:20})
           .fontSize(25)
           .onClick(()=>{
-            animateTo({
+            this.getUIContext().animateTo({
               duration:200
             },()=>{
               this.sidebarOpen=!this.sidebarOpen

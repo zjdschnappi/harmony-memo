@@ -5,23 +5,51 @@ import MemoViewModel from '../viewmodel/MemoViewModel'
 @Component
 struct  MemoItem {
   @ObjectLink item: MemoSimpleListItemModel
-  click: (item:MemoSimpleListItemModel)=>void = ()=>{}
   build(){
     Column(){
+      if(this.item.isPinned){
+        Text('置顶')
+          .backgroundColor(Color.Green)
+          .padding({left:5,right:5})
+          .position({left:-15,top:-15})
+          .fontColor(Color.White).fontSize(12)
+      }
+
       Text(this.item.title).fontSize(18).fontWeight(700)
       Row(){
         Text(this.item.simpleContent).fontSize(16)
         Text(this.item.modifiedTime).fontSize(12)
-      }.justifyContent(FlexAlign.SpaceBetween).width('100%')
-    }.width('100%').alignItems(HorizontalAlign.Start).border({
-      width:{
-        bottom: 1
-      },
-      color: '#dfdfdf'
-    }).padding({left:10,right:10,top: 5, bottom: 5})
-    .onClick(()=>{
-      this.click(this.item)
-    })
+      }
+      .justifyContent(FlexAlign.SpaceBetween).width('100%')
+    }
+    .width('100%')
+    .alignItems(HorizontalAlign.Start)
+
+
+  }
+}
+
+@Component
+struct ListItemSwipeEnd {
+  @ObjectLink item:MemoSimpleListItemModel
+  onPinTop:()=>void = ()=>{}
+  onDelete:()=>void = ()=>{}
+  build(){
+    Row({space: 10}){
+      SymbolGlyph(
+        this.item.isPinned?$r('sys.symbol.arrowshape_down_to_line_fill'):$r('sys.symbol.arrowshape_up_to_line_fill')
+      )
+        .fontSize(30)
+        .fontColor([Color.Brown])
+        .onClick(()=>{
+          this.onPinTop()
+        })
+      SymbolGlyph($r('sys.symbol.folder')).fontSize(30).fontColor([Color.Green])
+      SymbolGlyph($r('sys.symbol.trash')).fontSize(30).fontColor([Color.Red])
+        .onClick(()=>{
+          this.onDelete()
+        })
+    }.margin({left: 5})
 
   }
 }
@@ -33,21 +61,46 @@ export default struct MemoView {
   pageInfos:NavPathStack = new NavPathStack()
 
   @Builder
-  endBuilder(id:string){
-    Row({space: 20}){
-      SymbolGlyph($r('sys.symbol.pin')).fontSize(30).fontColor([Color.Brown]).onClick(()=>{
-        this.handlePinTop(id)
-      })
-      SymbolGlyph($r('sys.symbol.folder')).fontSize(30).fontColor([Color.Green])
-      SymbolGlyph($r('sys.symbol.trash')).fontSize(30).fontColor([Color.Red]).onClick(()=>{
-        this.handleDelete(id)
-      })
-    }
+  endBuilder(item:MemoSimpleListItemModel){
+    ListItemSwipeEnd({
+      item:item,
+      onPinTop:()=>{
+        this.handlePinTop(item.memoId)
+      },
+      onDelete:()=>{
+        this.handleDelete(item.memoId)
+      }
+    })
   }
   handlePinTop(id:string){
-    MemoViewModel.togglePin(id).then(()=>{
-      this.getMemoList()
+    MemoViewModel.togglePin(id)
+    this.scroller.closeAllSwipeActions()
+    let index = this.list.findIndex(item=>item.memoId==id)
+    let notPinnedIndex = this.list.findIndex(item=>!item.isPinned)
+    let lastPinnedIndex = -1
+    for(let i=this.list.length-1;i>=0;i--){
+      if(this.list[i].isPinned){
+        lastPinnedIndex = i
+        break;
+      }
+    }
+    let current = this.list[index];
+    let isPinned = current.isPinned
+    this.list[index].isPinned = !current.isPinned
+    this.getUIContext().animateTo({duration:300},()=>{
+      if(isPinned){
+        if(lastPinnedIndex>index){
+          this.list.splice(index,1)
+          this.list.splice(lastPinnedIndex,0,current)
+        }
+      }else {
+        if(notPinnedIndex<index){
+          this.list.splice(index,1)
+          this.list.splice(notPinnedIndex,0,current)
+        }
+      }
     })
+
   }
   handleDelete(id:string){
     this.getUIContext().getPromptAction().showDialog({
@@ -61,9 +114,14 @@ export default struct MemoView {
     }).then((value)=>{
       if(value.index==1){
         //
-        MemoViewModel.deleteMemo(id).then(()=>{
-          this.getMemoList()
-        })
+        MemoViewModel.deleteMemo(id)
+        let index = this.list.findIndex(item=>item.memoId==id)
+        if(index>-1){
+          this.getUIContext().animateTo({duration:300},()=>{
+
+            this.list.splice(index,1)
+          })
+        }
       }else {
         this.scroller.closeAllSwipeActions()
       }
@@ -89,15 +147,35 @@ export default struct MemoView {
       List({scroller:this.scroller}){
         ForEach(this.list,(item:MemoSimpleListItemModel)=>{
           ListItem(){
-            MemoItem({item:item,click:(detail)=>{
-                this.handleDetail(detail)
-            }})
-          }.swipeAction({
-            end: this.endBuilder(item.memoId)
+            MemoItem({item:item})
+          }
+          .padding(15)
+          .margin({top:15})
+          .backgroundColor(Color.White)
+          .swipeAction({
+            end: this.endBuilder(item)
           })
+          .onClick(()=>{
+            this.handleDetail(item)
+          })
+          .borderRadius(5)
+          .shadow(ShadowStyle.OUTER_DEFAULT_SM)
+          .border({
+            width:{
+              bottom: 1
+            },
+            color: '#dfdfdf'
+          })
+          .transition(TransitionEffect.SLIDE)
 
-        })
-      }.height('100%')
+
+          },(item:MemoSimpleListItemModel,)=>`${item.memoId}`
+        )
+      }
+      .height('100%')
+      .margin({left:15,right:15})
+      .backgroundColor(Color.Transparent)
+
     }else {
       Text('暂无数据')
     }
