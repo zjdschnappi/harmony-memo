@@ -1,33 +1,9 @@
 import { MemoSimpleListItemModel } from "../model/Memo"
 import { IMemoRouteParam } from "../types"
 import MemoViewModel from '../viewmodel/MemoViewModel'
-
-@Component
-struct  MemoItem {
-  @ObjectLink item: MemoSimpleListItemModel
-  build(){
-    Column(){
-      if(this.item.isPinned){
-        Text('置顶')
-          .backgroundColor(Color.Green)
-          .padding({left:5,right:5})
-          .position({left:-15,top:-15})
-          .fontColor(Color.White).fontSize(12)
-      }
-
-      Text(this.item.title).fontSize(18).fontWeight(700)
-      Row(){
-        Text(this.item.simpleContent).fontSize(16)
-        Text(this.item.modifiedTime).fontSize(12)
-      }
-      .justifyContent(FlexAlign.SpaceBetween).width('100%')
-    }
-    .width('100%')
-    .alignItems(HorizontalAlign.Start)
+import { MemoItem } from './MemoItem'
 
 
-  }
-}
 
 @Component
 struct ListItemSwipeEnd {
@@ -135,7 +111,7 @@ export default struct MemoView {
   }
   handleDetail(item:MemoSimpleListItemModel){
     let params:IMemoRouteParam = {id:item.memoId}
-    this.pageInfos.pushPathByName('CreateMemo',params,()=>{
+    this.pageInfos.pushPathByName('MemoDetail',params,()=>{
       this.getMemoList()
     })
   }
@@ -147,16 +123,13 @@ export default struct MemoView {
       List({scroller:this.scroller}){
         ForEach(this.list,(item:MemoSimpleListItemModel)=>{
           ListItem(){
-            MemoItem({item:item})
+            MemoItem({item:item,pageInfos: this.pageInfos})
           }
-          .padding(15)
+
           .margin({top:15})
           .backgroundColor(Color.White)
           .swipeAction({
             end: this.endBuilder(item)
-          })
-          .onClick(()=>{
-            this.handleDetail(item)
           })
           .borderRadius(5)
           .shadow(ShadowStyle.OUTER_DEFAULT_SM)

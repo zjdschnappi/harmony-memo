@@ -1,161 +1,68 @@
-import MemoView from '../components/MemoView';
-import TodoView from '../components/TodoView';
-import MemoViewModel from '../viewmodel/MemoViewModel'
-import {  MemoSimpleListItemModel } from '../model/Memo';
-import { IMemoRouteParam } from '../types';
+// Index.ets
+import { AnimateCallback, CustomTransition } from '../customTransition/CustomNavigationUtils';
 
-enum TabBarEnum {
-  TODO = 'TODO',
-  MEMO = 'MEMO'
-}
-interface ITabBarParams{
-  text: string;
-  type: TabBarEnum;
-  index:number;
-}
+const TAG: string = 'Index';
 
-function initData(){
-  const data:ITabBarParams[] = [
-    {text:'备忘',type: TabBarEnum.MEMO,index:0},
-    {text:'待办',type: TabBarEnum.TODO,index:1},
-
-  ]
-  return data
-}
 @Entry
 @Component
 struct Index {
-  @Provide list: MemoSimpleListItemModel[] = []
-  @StorageProp('dbInitialized') @Watch('dbInit') storageProp:boolean = false
-  @State sidebarOpen:boolean = false
-  @State currentTab:number = 0
-  pageInfos:NavPathStack = new NavPathStack()
+  private pageInfos: NavPathStack = new NavPathStack();
+  // 允许进行自定义转场的页面名称
+  private allowedCustomTransitionFromPageName: string[] = ['Home'];
+  private allowedCustomTransitionToPageName: string[] = ['MemoDetail'];
 
-  @Builder
-  TabBarBuilder(params:Partial<ITabBarParams>){
-    Text(params.text).backgroundColor(this.currentTab==params.index?'#dedede':'transparent')
-      .padding({top:10,left:20,right:20,bottom:10})
-      .borderRadius(20)
-  }
-  dbInit(){
-    this.getMemoList()
-  }
-  getMemoList(){
-    MemoViewModel.getActiveMemos().then((data)=>{
-      this.list = data.map(item=>{
-        return new MemoSimpleListItemModel(
-          item.memoId,
-          item.title,
-          item.simpleContent,
-          item.createdTime,
-          item.modifiedTime,
-          item.imgUrl,
-          item.isPinned,
-          item.isArchived,
-        )
-
-      })
-    })
+  aboutToAppear(): void {
+    this.pageInfos.pushPath({ name: 'Home' },false);
   }
 
-  onPageShow() {
-    this.getMemoList()
+  private isCustomTransitionEnabled(fromName: string, toName: string): boolean {
+    // 点击和返回均需要进行自定义转场，因此需要分别判断
+    if ((this.allowedCustomTransitionFromPageName.includes(fromName)
+      && this.allowedCustomTransitionToPageName.includes(toName))
+      || (this.allowedCustomTransitionFromPageName.includes(toName)
+        && this.allowedCustomTransitionToPageName.includes(fromName))) {
+      return true;
+    }
+    return false;
   }
+
   build() {
-    Navigation(this.pageInfos){
-      Stack(){
-        SideBarContainer(SideBarContainerType.Overlay){
-          Column(){
-            List(){
-
-              ListItem(){
-                Row(){
-                  Row(){
-                    SymbolGlyph($r('sys.symbol.list_square'))
-                    Blank()
-                    Text('全部备忘')
-                  }
-                  Text(String(this.list.length))
-                }
-                .justifyContent(FlexAlign.SpaceBetween)
-                .width('100%')
-
-
-              }.border({
-                width:{
-                  bottom: 1
-                },
-                color: '#dedede'
-              })
-              .padding({
-                top:10,
-                bottom:10,
-                left:20,
-                right:20
-              })
-            }.margin({top:100})
-          }.height('100%').backgroundColor('#fff')
-          Column(){
-            Tabs(){
-              ForEach(initData(),(item:ITabBarParams)=>{
-                TabContent(){
-                  if(item.type==TabBarEnum.MEMO){
-                    MemoView({pageInfos:this.pageInfos})
-                  }else {
-                    TodoView()
-                  }
-                }.tabBar(this.TabBarBuilder({text:item.text,index:item.index}))
-
-
-              })
-
-            }.barWidth(150)
-            .onChange((value)=>{
-              this.currentTab = value
-            })
-            SymbolGlyph($r('sys.symbol.house_setting'))
-              .position({top:15,right:20})
-              .fontSize(25)
-              .bindMenu([
-                {
-                  value: '设置',
-                  action:()=>{
-                    //
-                  }
-                }
-              ])
-            Row(){
-              SymbolGlyph($r('sys.symbol.plus_circle'))
-                .fontSize(30)
-                .onClick(()=>{
-                  const params:IMemoRouteParam= {id:'-1'}
-                  this.pageInfos.pushPathByName('CreateMemo',params,()=>{
-                    this.getMemoList()
-                  })
-                })
-            }.width('100%')
-            .justifyContent(FlexAlign.Center)
-            .position({bottom:20,left:0,right:0})
-          }.height('100%').width('100%').backgroundColor('#f3f3f3')
-
+    Navigation(this.pageInfos)
+      .hideNavBar(true)
+      .customNavContentTransition((from: NavContentInfo, to: NavContentInfo, operation: NavigationOperation) => {
+        if ((!from || !to) || (!from.name || !to.name)) {
+          return undefined;
         }
-        .showSideBar(this.sidebarOpen).showControlButton(false)
 
-        SymbolGlyph(this.sidebarOpen? $r('sys.symbol.open_sidebar'):$r('sys.symbol.close_sidebar'))
-          .position({top:15,left:20})
-          .fontSize(25)
-          .onClick(()=>{
-            this.getUIContext().animateTo({
-              duration:200
-            },()=>{
-              this.sidebarOpen=!this.sidebarOpen
-            })
-          })
+        // 通过from和to的name对自定义转场路由进行管控
+        if (!this.isCustomTransitionEnabled(from.name, to.name)) {
+          return undefined;
+        }
 
-      }
-      .height('100%')
-      .width('100%')
-    }.hideToolBar(true)
+        // 需要对转场页面是否注册了animation进行判断，来决定是否进行自定义转场
+        let fromParam: AnimateCallback = CustomTransition.getInstance().getAnimateParam(from.index);
+        let toParam: AnimateCallback = CustomTransition.getInstance().getAnimateParam(to.index);
+        if (!fromParam.animation || !toParam.animation) {
+          return undefined;
+        }
 
+        // 一切判断完成后，构造customAnimation给系统侧调用，执行自定义转场动画
+        let customAnimation: NavigationAnimatedTransition = {
+          onTransitionEnd: (isSuccess: boolean) => {
+            console.info(TAG, `current transition result is ${isSuccess}`);
+          },
+          timeout: 2000,
+          transition: (transitionProxy: NavigationTransitionProxy) => {
+            console.info(TAG, 'trigger transition callback');
+            if (fromParam.animation) {
+              fromParam.animation(operation == NavigationOperation.PUSH, true, transitionProxy);
+            }
+            if (toParam.animation) {
+              toParam.animation(operation == NavigationOperation.PUSH, false, transitionProxy);
+            }
+          }
+        };
+        return customAnimation;
+      })
   }
 }

@@ -1,6 +1,17 @@
 
+export interface IRectInfoInPx {
+  left: number
+  top: number
+  right: number
+  bottom: number
+  width: number
+  height: number
+}
+
 export interface IMemoRouteParam {
-  id: string
+  id: string;
+  doDefaultTransition?:()=>void;
+  itemRectInfo?: IRectInfoInPx
 }
 
 export interface IColorItemParams {

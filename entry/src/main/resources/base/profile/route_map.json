@@ -1,6 +1,22 @@
 {
   "routerMap": [
     {
+      "name": "Home",
+      "pageSourceFile": "src/main/ets/pages/Home.ets",
+      "buildFunction": "HomeBuilder",
+      "data": {
+        "description" : "新建备忘"
+      }
+    },
+    {
+      "name": "MemoDetail",
+      "pageSourceFile": "src/main/ets/pages/MemoDetail.ets",
+      "buildFunction": "MemoDetailBuilder",
+      "data": {
+        "description" : "备忘详情"
+      }
+    },
+    {
       "name": "CreateMemo",
       "pageSourceFile": "src/main/ets/pages/CreateMemo.ets",
       "buildFunction": "CreateMemoBuilder",
@@ -8,5 +24,6 @@
         "description" : "新建备忘"
       }
     }
+
   ]
 }
