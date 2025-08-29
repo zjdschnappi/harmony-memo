@@ -55,6 +55,7 @@ struct MemoDetail {
       .borderRadius(this.AnimationProperties.radius)
       // expandSafeArea使得Stack做沉浸式效果，向上扩到状态栏，向下扩到导航条
       .expandSafeArea([SafeAreaType.SYSTEM])
+      .backgroundColor(this.AnimationProperties.navDestinationBgColor)
 
     }
 
@@ -64,12 +65,14 @@ struct MemoDetail {
 
       let param = context.pathInfo?.param as IMemoRouteParam;
       this.myNodeController = getNode(param.id);
+      this.myNodeController?.update(true)
       let noop = ()=>{}
       this.prePageDoFinishTransition = param.doDefaultTransition||noop
+      this.itemRectInfo = param.itemRectInfo as RectInfoInPx
       CustomTransition.getInstance().registerNavParam(this.pageId,
         (isPush: boolean, isExit: boolean, transitionProxy: NavigationTransitionProxy) => {
           this.AnimationProperties.doAnimation(
-            this.itemRectInfo, isPush, isExit, transitionProxy, 0,
+            this.itemRectInfo, isPush, isExit, transitionProxy, 0,95,
             this.prePageDoFinishTransition, this.myNodeController);
         }, 500);
     })

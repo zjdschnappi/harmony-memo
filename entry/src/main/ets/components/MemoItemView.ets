@@ -6,6 +6,9 @@ export struct MemoItemView {
   @Prop isExpand:boolean = false
   build(){
     Column(){
+      if(this.isExpand){
+        // TODO 跳转到详情页时给另一个样式
+      }
       if(this.item.isPinned){
         Text('置顶')
           .backgroundColor(Color.Green)

@@ -12,6 +12,7 @@ export struct MemoItem {
   private doFinishTransition(id:string): void {
     // PageTwo结束转场时将节点从PageTwo迁移回PageOne
     this.memoItemNode = getNode(id);
+    this.memoItemNode?.update(false)
   }
 
   handleDetail(item:MemoSimpleListItemModel){

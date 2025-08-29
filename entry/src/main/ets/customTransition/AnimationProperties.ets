@@ -28,7 +28,7 @@ export class AnimationProperties {
   }
 
   public doAnimation(cardItemInfo_px: RectInfoInPx, isPush: boolean, isExit: boolean,
-    transitionProxy: NavigationTransitionProxy, extraTranslateValue: number, prePageOnFinish: (node: MemoItemNode) => void, myNodeController: MemoItemNode | undefined): void {
+    transitionProxy: NavigationTransitionProxy, extraTranslateValue: number,navBarHeight:number, prePageOnFinish: (node: MemoItemNode) => void, myNodeController: MemoItemNode | undefined): void {
     // 首先计算卡片的宽高与窗口宽高的比例
     let widthScaleRatio = cardItemInfo_px.width / WindowUtils.windowWidth_px;
     let heightScaleRatio = cardItemInfo_px.height / WindowUtils.windowHeight_px;
@@ -54,6 +54,7 @@ export class AnimationProperties {
       initTranslateX = this.uiContext.px2vp(cardItemInfo_px.left - (WindowUtils.windowWidth_px / 2 - cardItemInfo_px.width / 2));
     }
 
+    initTranslateY = initTranslateY - navBarHeight
     // 转场动画开始前通过计算scale、translate、position和clip height & width，确定节点迁移前后位置一致
     console.info(TAG, 'initScale: ' + initScale + ' initTranslateX ' + initTranslateX +
       ' initTranslateY ' + initTranslateY + ' initClipWidth ' + initClipWidth +

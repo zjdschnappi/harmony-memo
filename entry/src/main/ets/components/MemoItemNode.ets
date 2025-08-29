@@ -1,4 +1,3 @@
-// PostNode.ets
 // 跨容器迁移能力
 import { UIContext } from '@ohos.arkui.UIContext';
 import { NodeController, BuilderNode, FrameNode } from '@ohos.arkui.node';
@@ -20,6 +19,7 @@ function MemoItemBuilder(data: IBuilderProp) {
 export class MemoItemNode extends NodeController {
   private node: BuilderNode<IBuilderProp[]> | null = null;
   private isRemove: boolean = false;
+  private item: MemoSimpleListItemModel|null = null
   private wrapBuilder: WrappedBuilder<IBuilderProp[]> = wrapBuilder(MemoItemBuilder);
   private needCreate: boolean = false;
   constructor(create: boolean) {
@@ -57,16 +57,17 @@ export class MemoItemNode extends NodeController {
     if (this.node != null) {
       return;
     }
+    this.item = item
     // 创建节点，需要uiContext
     this.node = new BuilderNode(uiContext)
     // 创建离线组件
     this.node.build(this.wrapBuilder, { item: item, isExpand: isExpand })
   }
 
-  update(item:MemoSimpleListItemModel, isExpand: boolean) {
+  update(isExpand: boolean) {
     if (this.node !== null) {
       // 调用update进行更新。
-      this.node.update({ item: item, isExpand: isExpand });
+      this.node.update({ item: this.item, isExpand: isExpand });
     }
   }
 
