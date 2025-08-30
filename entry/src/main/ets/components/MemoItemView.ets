@@ -10,12 +10,13 @@ export struct MemoItemView {
   build(){
     Column(){
       if(this.isExpand){
-        // TODO 跳转到详情页时给另一个样式
+
         CustomTitleBar({
           onBackPress:()=>{
             this.pagePathStackInfos?.pop()
           }
         })
+          .margin({top: 21})
 
 
       }

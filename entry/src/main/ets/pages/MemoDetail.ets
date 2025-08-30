@@ -16,7 +16,7 @@ struct MemoDetail {
   @State myNodeController: MemoItemNode | undefined = new MemoItemNode(false);
 
   private pageId: number = -1;
-
+  private pageParams:IMemoRouteParam = {id:'-1'}
   private shouldDoDefaultTransition: boolean = false;
   private prePageDoFinishTransition: (() => void) = () => {};
   private itemRectInfo: RectInfoInPx = new RectInfoInPx();
@@ -43,13 +43,17 @@ struct MemoDetail {
 
   build() {
     NavDestination() {
-      Stack(){
-        Stack(){
+      Stack({alignContent:Alignment.Start}){
+        Stack({alignContent:Alignment.Start}){
           Column() {
             NodeContainer(this.myNodeController)
           }
           .alignItems(HorizontalAlign.Start)
-        }.position({y:this.AnimationProperties.positionValue})
+
+        }
+
+        .position({y:this.AnimationProperties.positionValue})
+
       }
       .scale({ x: this.AnimationProperties.scaleValue, y: this.AnimationProperties.scaleValue })
       .translate({ x: this.AnimationProperties.translateX, y: this.AnimationProperties.translateY })
@@ -60,6 +64,7 @@ struct MemoDetail {
       .expandSafeArea([SafeAreaType.SYSTEM])
       .backgroundColor(this.AnimationProperties.navDestinationBgColor)
 
+
     }
     .backgroundColor(Color.Transparent)
     .hideTitleBar(true)
@@ -68,6 +73,7 @@ struct MemoDetail {
       this.pageId = this.pageInfos.getAllPathName().length - 1;
 
       let param = context.pathInfo?.param as IMemoRouteParam;
+      this.pageParams = param
       this.myNodeController = getNode(param.id);
       this.myNodeController?.update(true)
       let noop = ()=>{}

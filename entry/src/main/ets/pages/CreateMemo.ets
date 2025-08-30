@@ -31,7 +31,6 @@ struct CreateMemo {
   controller: RichEditorController = new RichEditorController();
   pageParams:IMemoRouteParam ={id:'-1'}
   @State memoTitle:string = '标题'
-  @State translateY: string = '0';
 
   @Builder
   titleBarBuilder(){
@@ -109,63 +108,17 @@ struct CreateMemo {
     NavDestination(){
       CustomTitleBar({
         onBackPress:()=>{
-          this.pageInfos.pushPath({name: 'Home'})
+          this.pageInfos.pop()
         },
         extraContent:()=>{
           this.titleBarBuilder()
         }
       })
-      .margin({top: 10})
-      .width('100%')
-      .height(60)
+        .padding({left:15,right:15})
       MemoDetailView()
       .width('100%').layoutWeight(1)
     }
-    .translate({ y: this.translateY })
-    .customTransition(
-      (op: NavigationOperation, isEnter: boolean)
-        : Array<NavDestinationTransition> | undefined => {
-        console.log('[NavDestinationTransition]', 'reached delegate in frontend, op: ' + op + ', isEnter: ' + isEnter);
-        // navDestination动画的事件。navDestination自定义动画会基于当前组件的UI状态与事件执行后的UI状态来发起动画。
-        let transitionOneEvent = () => { console.log('[NavDestinationTransition]', 'reached transitionOne, empty now!'); }
-        if (op === NavigationOperation.PUSH) {
-          if (isEnter) {
-            // ENTER_PUSH
-            // 为入场的PUSH页面设置动画
-            console.log('[NavDestinationTransition]', 'push & isEnter, init y to 100%');
-            this.translateY = '100%';
-            transitionOneEvent = () => {
-              console.log('[NavDestinationTransition]', 'push & isEnter, finally set y to 0');
-              this.translateY = '0';
-            }
-          }
-        } else if (op === NavigationOperation.POP) {
-          if (!isEnter) {
-            // EXIT_POP
-            // 为离场的POP页面设置动画
-            console.log('[NavDestinationTransition]', 'pop & isExit, init y to 0');
-            this.translateY = '0';
-            transitionOneEvent = () => {
-              console.log('[NavDestinationTransition]', 'pop & isExit, finally set y to 100%');
-              this.translateY = '100%';
-            }
-          }
-        } else if (op === NavigationOperation.REPLACE) {
-          console.log('[NavDestinationTransition]', 'REPLACE not support');
-        } else {
-          console.log('[NavDestinationTransition]', 'invalid operation!');
-        }
-        // 根据以上逻辑，确定动画的行为，并创建类型为NavDestinationTransition的动画实例transitionOne
-        let transitionOne: NavDestinationTransition = {
-          duration: 500,
-          delay: 0,
-          curve: Curve.Friction,
-          event: transitionOneEvent,
-          onTransitionEnd: () => { console.log('[NavDestinationTransition]', 'reached transitionOneFinish, empty now!'); }
-        };
-        // 将transitionOne作为返回值传递给系统，系统侧将发起transitionOne对应的动画
-        return [ transitionOne ];
-      })
+    .systemTransition(NavigationSystemTransitionType.NONE)
     .onReady((ctx)=>{
 
       this.pageInfos = ctx.pathStack
@@ -175,5 +128,6 @@ struct CreateMemo {
     })
     .height('100%')
     .hideTitleBar(true)
+
   }
 }
