@@ -6,13 +6,13 @@ const TAG: string = 'Index';
 @Entry
 @Component
 struct Index {
-  private pageInfos: NavPathStack = new NavPathStack();
+  @Provide pagePathStackInfos: NavPathStack = new NavPathStack();
   // 允许进行自定义转场的页面名称
   private allowedCustomTransitionFromPageName: string[] = ['Home'];
   private allowedCustomTransitionToPageName: string[] = ['MemoDetail'];
 
   aboutToAppear(): void {
-    this.pageInfos.pushPath({ name: 'Home' },false);
+    this.pagePathStackInfos.pushPath({ name: 'Home' },false);
   }
 
   private isCustomTransitionEnabled(fromName: string, toName: string): boolean {
@@ -27,7 +27,7 @@ struct Index {
   }
 
   build() {
-    Navigation(this.pageInfos)
+    Navigation(this.pagePathStackInfos)
       .hideNavBar(true)
       .customNavContentTransition((from: NavContentInfo, to: NavContentInfo, operation: NavigationOperation) => {
         if ((!from || !to) || (!from.name || !to.name)) {

@@ -5,9 +5,9 @@ import { createNode, getNode, MemoItemNode } from './MemoItemNode';
 
 @Component
 export struct MemoItem {
+  @Consume pagePathStackInfos:NavPathStack
   @ObjectLink item:MemoSimpleListItemModel
   @State memoItemNode: MemoItemNode | undefined = new MemoItemNode(false)
-  pageInfos: NavPathStack = new NavPathStack();
 
   private doFinishTransition(id:string): void {
     // PageTwo结束转场时将节点从PageTwo迁移回PageOne
@@ -25,7 +25,7 @@ export struct MemoItem {
     param['doDefaultTransition'] = (myController: MemoItemNode) => {
       this.doFinishTransition(item.memoId)
     };
-    this.pageInfos.pushPathByName('MemoDetail',param);
+    this.pagePathStackInfos.pushPathByName('MemoDetail',param);
     // 自定义节点从Home下树
     if (this.memoItemNode != undefined) {
       this.memoItemNode.onRemove();

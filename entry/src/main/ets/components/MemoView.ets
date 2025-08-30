@@ -34,7 +34,6 @@ struct ListItemSwipeEnd {
 export default struct MemoView {
   @Consume list: MemoSimpleListItemModel[]
   scroller:ListScroller = new ListScroller()
-  pageInfos:NavPathStack = new NavPathStack()
 
   @Builder
   endBuilder(item:MemoSimpleListItemModel){
@@ -109,12 +108,6 @@ export default struct MemoView {
       this.list = data
     })
   }
-  handleDetail(item:MemoSimpleListItemModel){
-    let params:IMemoRouteParam = {id:item.memoId}
-    this.pageInfos.pushPathByName('MemoDetail',params,()=>{
-      this.getMemoList()
-    })
-  }
 
   build(){
     //
@@ -123,7 +116,7 @@ export default struct MemoView {
       List({scroller:this.scroller}){
         ForEach(this.list,(item:MemoSimpleListItemModel)=>{
           ListItem(){
-            MemoItem({item:item,pageInfos: this.pageInfos})
+            MemoItem({item:item})
           }
 
           .margin({top:15})

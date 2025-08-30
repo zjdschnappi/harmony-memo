@@ -33,10 +33,11 @@ function HomeBuilder(){
 @Component
 struct Home {
   @Provide list: MemoSimpleListItemModel[] = []
+  @Consume pagePathStackInfos:NavPathStack
   @StorageProp('dbInitialized') @Watch('dbInit') storageProp:boolean = false
   @State sidebarOpen:boolean = false
   @State currentTab:number = 0
-  pageInfos:NavPathStack = new NavPathStack()
+
   private pageId: number = -1;
 
   private registerCustomTransition(): void {
@@ -109,7 +110,7 @@ struct Home {
               ForEach(initData(),(item:ITabBarParams)=>{
                 TabContent(){
                   if(item.type==TabBarEnum.MEMO){
-                    MemoView({pageInfos:this.pageInfos})
+                    MemoView()
                   }else {
                     TodoView()
                   }
@@ -138,7 +139,7 @@ struct Home {
                 .fontSize(30)
                 .onClick(()=>{
                   const params:IMemoRouteParam= {id:'-1'}
-                  this.pageInfos.pushPathByName('CreateMemo',params,()=>{
+                  this.pagePathStackInfos.pushPathByName('CreateMemo',params,()=>{
                     this.getMemoList()
                   })
                 })
@@ -166,8 +167,7 @@ struct Home {
       .width('100%')
     }
     .onReady((context)=>{
-      this.pageInfos = context.pathStack;
-      this.pageId = this.pageInfos.getAllPathName().length - 1;
+      this.pageId = context.pathStack.getAllPathName().length - 1;
       this.registerCustomTransition();
     })
     .onDisAppear(() => {
