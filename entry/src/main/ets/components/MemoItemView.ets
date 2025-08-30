@@ -5,6 +5,7 @@ import { CustomTitleBar } from "./CustomTitleBar"
 @Component
 export struct MemoItemView {
   @ObjectLink item: MemoSimpleListItemModel
+  pagePathStackInfos: NavPathStack |null = null
   @Prop isExpand:boolean = false
   build(){
     Column(){
@@ -12,7 +13,7 @@ export struct MemoItemView {
         // TODO 跳转到详情页时给另一个样式
         CustomTitleBar({
           onBackPress:()=>{
-            //
+            this.pagePathStackInfos?.pop()
           }
         })
 

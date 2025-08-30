@@ -35,9 +35,9 @@ export struct MemoItem {
     let node = getNode(this.item.memoId);
     if (node == undefined) {
       // 新建自定义节点
-      node = createNode(this.getUIContext(),this.item,false);
+      node = createNode(this.getUIContext(),this.pagePathStackInfos,this.item,false);
     }
-    this.memoItemNode = getNode(this.item.memoId);
+    this.memoItemNode = node
   }
   build() {
     Column(){

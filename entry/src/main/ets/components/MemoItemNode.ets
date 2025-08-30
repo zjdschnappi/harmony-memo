@@ -6,13 +6,14 @@ import { MemoSimpleListItemModel } from '../model/Memo';
 
 interface IBuilderProp {
   item: MemoSimpleListItemModel;
+  pagePathStackInfos:NavPathStack,
   isExpand?:boolean
 }
 
 @Builder
 function MemoItemBuilder(data: IBuilderProp) {
   // 跨容器迁移组件置于@Builder内
-  MemoItemView({item:data.item,isExpand:data.isExpand}).id(data.item.memoId)
+  MemoItemView({item:data.item, pagePathStackInfos:data.pagePathStackInfos, isExpand:data.isExpand}).id(data.item.memoId)
 }
 
 
@@ -20,6 +21,7 @@ export class MemoItemNode extends NodeController {
   private node: BuilderNode<IBuilderProp[]> | null = null;
   private isRemove: boolean = false;
   private item: MemoSimpleListItemModel|null = null
+  private pagePathStackInfos: NavPathStack = new NavPathStack()
   private wrapBuilder: WrappedBuilder<IBuilderProp[]> = wrapBuilder(MemoItemBuilder);
   private needCreate: boolean = false;
   constructor(create: boolean) {
@@ -53,21 +55,22 @@ export class MemoItemNode extends NodeController {
     this.rebuild();
     this.isRemove = false;
   }
-  init(uiContext: UIContext, item: MemoSimpleListItemModel, isExpand: boolean) {
+  init(uiContext: UIContext,pagePathStackInfo:NavPathStack, item: MemoSimpleListItemModel, isExpand: boolean) {
     if (this.node != null) {
       return;
     }
     this.item = item
+    this.pagePathStackInfos = pagePathStackInfo
     // 创建节点，需要uiContext
     this.node = new BuilderNode(uiContext)
     // 创建离线组件
-    this.node.build(this.wrapBuilder, { item: item, isExpand: isExpand })
+    this.node.build(this.wrapBuilder, { item: item, isExpand: isExpand, pagePathStackInfos:pagePathStackInfo })
   }
 
   update(isExpand: boolean) {
     if (this.node !== null) {
       // 调用update进行更新。
-      this.node.update({ item: this.item, isExpand: isExpand });
+      this.node.update({ item: this.item,pagePathStackInfos: this.pagePathStackInfos, isExpand: isExpand });
     }
   }
 
@@ -76,9 +79,9 @@ export class MemoItemNode extends NodeController {
 let gNodeMap: Map<string, MemoItemNode | undefined> = new Map();
 
 export const createNode =
-  (uiContext: UIContext, item: MemoSimpleListItemModel, isExpand: boolean): MemoItemNode | undefined => {
+  (uiContext: UIContext,pagePathStackInfos:NavPathStack, item: MemoSimpleListItemModel, isExpand: boolean): MemoItemNode | undefined => {
     let node = new MemoItemNode(false);
-    node.init(uiContext, item, isExpand);
+    node.init(uiContext,pagePathStackInfos, item, isExpand);
     gNodeMap.set(item.memoId, node);
     return node;
   }
