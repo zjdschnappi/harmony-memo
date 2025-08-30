@@ -3,20 +3,14 @@ import { CustomTitleBar } from "./CustomTitleBar"
 
 
 @Component
-export struct MemoItemView {
+export struct  MemoItemView {
   @ObjectLink item: MemoSimpleListItemModel
-  pagePathStackInfos: NavPathStack |null = null
   @Prop isExpand:boolean = false
   build(){
     Column(){
       if(this.isExpand){
 
-        CustomTitleBar({
-          onBackPress:()=>{
-            this.pagePathStackInfos?.pop()
-          }
-        })
-          .margin({top: 21})
+        //
 
 
       }

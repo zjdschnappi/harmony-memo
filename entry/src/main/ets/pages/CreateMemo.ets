@@ -62,42 +62,7 @@ struct CreateMemo {
      //
       await MemoViewModel.updateMemo(memoId,title,spans)
     }
-    this.pageInfos.pop({result:null})
-  }
-  handleGetDetail(){
-    let px2vp = this.getUIContext().px2vp
-    MemoViewModel.getDetailById(this.pageParams.id).then((data)=>{
-
-      this.memoTitle = data?.title||''
-      data?.content?.forEach((item:IMemoContentItem)=>{
-        if(typeof (item as RichEditorImageSpanResult).valueResourceStr!='undefined'){
-          let content = item as RichEditorImageSpanResult
-
-          this.controller.addImageSpan(content.valueResourceStr,{
-            imageStyle: {
-              size:content.imageStyle.size.map(item=>px2vp(item)) as [Dimension,Dimension],
-              layoutStyle:content.imageStyle.layoutStyle,
-              verticalAlign:content.imageStyle.verticalAlign,
-              objectFit:content.imageStyle.objectFit
-            }
-          })
-        }else {
-          let content = item as RichEditorTextSpanResult
-          this.controller.addTextSpan(content.value,{
-            style: {
-              fontColor: content.textStyle.fontColor,
-              fontWeight: content.textStyle.fontWeight==9?FontWeight.Bold:FontWeight.Normal,
-              fontSize: content.textStyle.fontSize,
-              fontStyle: content.textStyle.fontStyle,
-              decoration: content.textStyle.decoration,
-              fontFeature: content.textStyle.fontFeature
-
-            },
-            paragraphStyle: content.paragraphStyle
-          })
-        }
-      })
-    })
+    this.pageInfos.popToName('Home',{result:null})
   }
   aboutToAppear(): void {
     this.getUIContext().setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE)
@@ -115,7 +80,7 @@ struct CreateMemo {
         }
       })
         .padding({left:15,right:15})
-      MemoDetailView()
+      MemoDetailView({memoTitle:this.memoTitle})
       .width('100%').layoutWeight(1)
     }
     .systemTransition(NavigationSystemTransitionType.NONE)
@@ -124,7 +89,6 @@ struct CreateMemo {
       this.pageInfos = ctx.pathStack
       this.pageParams = ctx.pathInfo.param as IMemoRouteParam
 
-      this.handleGetDetail()
     })
     .height('100%')
     .hideTitleBar(true)

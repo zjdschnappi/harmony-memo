@@ -5,7 +5,7 @@ import {IMemoRouteParam} from '../types'
 @Component
 export struct MemoDetailView {
   @Prop isEnabled:boolean = true
-  @State memoTitle:string = '';
+  @Link memoTitle:string;
   controller: RichEditorController = new RichEditorController();
   pageParams:IMemoRouteParam ={id:'-1'}
   handleGetDetail() {
@@ -55,11 +55,11 @@ export struct MemoDetailView {
           size: 30
         })
 
-        .defaultFocus(true)
+
         .caretColor(Color.Orange)
         .fontSize(30)
         .backgroundColor(Color.Transparent)
-      Editor({editorOptions:{controller:this.controller}}).layoutWeight(1).enabled(this.isEnabled)
+      Editor({editorOptions:{controller:this.controller}}).layoutWeight(1).enabled(this.isEnabled).defaultFocus(true)
     }
   }
 }

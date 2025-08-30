@@ -33,6 +33,7 @@ struct ListItemSwipeEnd {
 @Component
 export default struct MemoView {
   @Consume list: MemoSimpleListItemModel[]
+  @Consume pagePathStackInfos:NavPathStack
   scroller:ListScroller = new ListScroller()
 
   @Builder
@@ -102,7 +103,16 @@ export default struct MemoView {
       }
     })
   }
+  handleDetail(params:IMemoRouteParam){
+    let p:Promise<void> =  new Promise((resolve,reject)=>{
 
+      this.pagePathStackInfos.pushPathByName('MemoDetail',params,()=>{
+        this.getMemoList()
+      })
+      resolve()
+    })
+    return p
+  }
   getMemoList(){
     MemoViewModel.getActiveMemos().then((data)=>{
       this.list = data
@@ -116,7 +126,7 @@ export default struct MemoView {
       List({scroller:this.scroller}){
         ForEach(this.list,(item:MemoSimpleListItemModel)=>{
           ListItem(){
-            MemoItem({item:item})
+            MemoItem({item:item,onDetail:this.handleDetail})
           }
 
           .margin({top:15})

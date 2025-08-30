@@ -1,4 +1,5 @@
 import { MemoSimpleListItemModel } from '../model/Memo';
+import { IMemoRouteParam,IRectInfoInPx } from '../types';
 import { ComponentAttrUtils, RectInfoInPx } from '../utils/ComponentAttrUtils';
 import { WindowUtils } from '../utils/WindowUtils';
 import { createNode, getNode, MemoItemNode } from './MemoItemNode';
@@ -8,6 +9,7 @@ export struct MemoItem {
   @Consume pagePathStackInfos:NavPathStack
   @ObjectLink item:MemoSimpleListItemModel
   @State memoItemNode: MemoItemNode | undefined = new MemoItemNode(false)
+  onDetail:((item:IMemoRouteParam)=>Promise<void>)|null= null
 
   private doFinishTransition(id:string): void {
     // PageTwo结束转场时将节点从PageTwo迁移回PageOne
@@ -19,17 +21,21 @@ export struct MemoItem {
 
     let itemRectInfo: RectInfoInPx =
       ComponentAttrUtils.getRectInfoById(WindowUtils.window.getUIContext(), item.memoId);
-    let param: Record<string, Object> = {};
-    param['itemRectInfo'] = itemRectInfo;
-    param['id'] = item.memoId
-    param['doDefaultTransition'] = (myController: MemoItemNode) => {
-      this.doFinishTransition(item.memoId)
-    };
-    this.pagePathStackInfos.pushPathByName('MemoDetail',param);
-    // 自定义节点从Home下树
-    if (this.memoItemNode != undefined) {
-      this.memoItemNode.onRemove();
+    let param:IMemoRouteParam = {
+      itemRectInfo:itemRectInfo as IRectInfoInPx,
+      id:item.memoId,
+      doDefaultTransition:() => {
+        this.doFinishTransition(item.memoId)
+      }
     }
+
+   this.onDetail?.(param).then(()=>{
+     // 自定义节点从Home下树
+     if (this.memoItemNode != undefined) {
+       this.memoItemNode.onRemove();
+     }
+   })
+
   }
   aboutToAppear(): void {
     let node = getNode(this.item.memoId);
