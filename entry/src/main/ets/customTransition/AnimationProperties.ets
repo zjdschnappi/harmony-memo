@@ -8,11 +8,11 @@ import { MemoItemNode } from '../components/MemoItemNode';
 const TAG: string = 'AnimationProperties';
 
 const DEVICE_BORDER_RADIUS: number = 34;
-
+const DEFAULT_COLOR = '#fff'
 // 将自定义一镜到底转场动画进行封装，其他界面也需要做自定义一镜到底转场的话，可以直接复用，减少工作量
 @Observed
 export class AnimationProperties {
-  public navDestinationBgColor: ResourceColor = Color.Transparent;
+  public navDestinationBgColor: ResourceColor = DEFAULT_COLOR
   public translateX: number = 0;
   public translateY: number = 0;
   public scaleValue: number = 1;
@@ -28,7 +28,7 @@ export class AnimationProperties {
   }
 
   public doAnimation(cardItemInfo_px: RectInfoInPx, isPush: boolean, isExit: boolean,
-    transitionProxy: NavigationTransitionProxy, extraTranslateValue: number,navBarHeight:number, prePageOnFinish: (node: MemoItemNode) => void, myNodeController: MemoItemNode | undefined): void {
+    transitionProxy: NavigationTransitionProxy, extraTranslateValue: number, prePageOnFinish: (node: MemoItemNode) => void, myNodeController: MemoItemNode | undefined): void {
     // 首先计算卡片的宽高与窗口宽高的比例
     let widthScaleRatio = cardItemInfo_px.width / WindowUtils.windowWidth_px;
     let heightScaleRatio = cardItemInfo_px.height / WindowUtils.windowHeight_px;
@@ -54,7 +54,6 @@ export class AnimationProperties {
       initTranslateX = this.uiContext.px2vp(cardItemInfo_px.left - (WindowUtils.windowWidth_px / 2 - cardItemInfo_px.width / 2));
     }
 
-    initTranslateY = initTranslateY - navBarHeight
     // 转场动画开始前通过计算scale、translate、position和clip height & width，确定节点迁移前后位置一致
     console.info(TAG, 'initScale: ' + initScale + ' initTranslateX ' + initTranslateX +
       ' initTranslateY ' + initTranslateY + ' initClipWidth ' + initClipWidth +
@@ -91,7 +90,7 @@ export class AnimationProperties {
         curve: Curve.Sharp,
       }, () => {
         // 页面由透明逐渐变为设置背景色
-        this.navDestinationBgColor = '#00ffffff';
+        this.navDestinationBgColor = DEFAULT_COLOR
       })
 
       // 返回旧页面
@@ -125,7 +124,7 @@ export class AnimationProperties {
         delay: 150,
         curve: Curve.Friction,
       }, () => {
-        this.navDestinationBgColor = Color.Transparent;
+        this.navDestinationBgColor = DEFAULT_COLOR
       })
     }
   }

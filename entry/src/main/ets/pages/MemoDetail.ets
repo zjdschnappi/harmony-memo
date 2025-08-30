@@ -43,11 +43,14 @@ struct MemoDetail {
 
   build() {
     NavDestination() {
-      Column() {
-        NodeContainer(this.myNodeController)
+      Stack(){
+        Stack(){
+          Column() {
+            NodeContainer(this.myNodeController)
+          }
+          .alignItems(HorizontalAlign.Start)
+        }.position({y:this.AnimationProperties.positionValue})
       }
-      .alignItems(HorizontalAlign.Start)
-
       .scale({ x: this.AnimationProperties.scaleValue, y: this.AnimationProperties.scaleValue })
       .translate({ x: this.AnimationProperties.translateX, y: this.AnimationProperties.translateY })
       .width(this.AnimationProperties.clipWidth)
@@ -58,7 +61,8 @@ struct MemoDetail {
       .backgroundColor(this.AnimationProperties.navDestinationBgColor)
 
     }
-
+    .backgroundColor(Color.Transparent)
+    .hideTitleBar(true)
     .onReady((context: NavDestinationContext) => {
       this.pageInfos = context.pathStack;
       this.pageId = this.pageInfos.getAllPathName().length - 1;
@@ -72,7 +76,7 @@ struct MemoDetail {
       CustomTransition.getInstance().registerNavParam(this.pageId,
         (isPush: boolean, isExit: boolean, transitionProxy: NavigationTransitionProxy) => {
           this.AnimationProperties.doAnimation(
-            this.itemRectInfo, isPush, isExit, transitionProxy, 0,95,
+            this.itemRectInfo, isPush, isExit, transitionProxy, 0,
             this.prePageDoFinishTransition, this.myNodeController);
         }, 500);
     })
