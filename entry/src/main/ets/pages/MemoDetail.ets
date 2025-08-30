@@ -3,6 +3,8 @@ import { getNode, MemoItemNode } from '../components/MemoItemNode'
 import { AnimationProperties } from '../customTransition/AnimationProperties'
 import {IMemoRouteParam} from '../types'
 import { RectInfoInPx } from '../utils/ComponentAttrUtils'
+import MemoViewModel from '../viewmodel/MemoViewModel'
+import { CustomTitleBar } from '../components/CustomTitleBar';
 
 @Builder
 function MemoDetailBuilder(){
@@ -40,12 +42,45 @@ struct MemoDetail {
     this.pageInfos.pop();
     return true;
   }
+  private handleShare(){
+    //
+  }
+  private handleDelete(){
+    //
+    this.getUIContext().getPromptAction().showDialog({
+      title: '提示',
+      message:'确认删除这条记录吗？',
+      buttons:[
+        {text:'取消',primary:false,color:'black'},
+        {text:'确定',primary:true,color:'red'}
+      ],
 
+    }).then((value)=>{
+      if(value.index==1) {
+        MemoViewModel.deleteMemo(this.pageParams.id).then(()=>{
+          this.pageInfos.pop()
+        })
+      }else {
+      }
+    })
+
+  }
+  private handleEdit(){
+    //
+    let params:IMemoRouteParam = {id:this.pageParams.id}
+    this.pageInfos.pushPathByName('CreateMemo',params,false)
+  }
+  private handleBack = () =>{
+    this.onBackPressed()
+  }
   build() {
     NavDestination() {
       Stack({alignContent:Alignment.Start}){
         Stack({alignContent:Alignment.Start}){
           Column() {
+            CustomTitleBar({onBackPress:this.handleBack})
+              .margin({top: 21})
+              .padding({left: 15,right: 15})
             NodeContainer(this.myNodeController)
           }
           .alignItems(HorizontalAlign.Start)
@@ -53,6 +88,23 @@ struct MemoDetail {
         }
 
         .position({y:this.AnimationProperties.positionValue})
+        if(this.AnimationProperties.showDetailContent){
+          Row(){
+            SymbolGlyph($r('sys.symbol.share')).fontSize(30).onClick(()=>{
+              this.handleShare()
+            })
+            SymbolGlyph($r('sys.symbol.trash')).fontSize(30).onClick(()=>{
+              this.handleDelete()
+            })
+            SymbolGlyph($r('sys.symbol.ai_edit')).fontSize(30).onClick(()=>{
+              this.handleEdit()
+            })
+          }
+          .justifyContent(FlexAlign.SpaceAround)
+          .padding({left: 20,bottom: 20})
+          .position({bottom:0,left:0})
+          .width('100%')
+        }
 
       }
       .scale({ x: this.AnimationProperties.scaleValue, y: this.AnimationProperties.scaleValue })
