@@ -4,6 +4,7 @@ import { IMemoRouteParam,  } from "../types";
 import { IMemoContentItem } from "../model/Memo";
 import { Editor } from "../components/Editor";
 import { MemoDetailView } from "../components/MemoDetailView";
+import { CustomTitleBar } from "../components/CustomTitleBar";
 
 @Builder
 export function CreateMemoBuilder(){
@@ -32,6 +33,22 @@ struct CreateMemo {
   @State memoTitle:string = '标题'
   @State translateY: string = '0';
 
+  @Builder
+  titleBarBuilder(){
+    Row({space: 10}){
+      Text(){
+        SymbolSpan($r('sys.symbol.undo'))
+      }.IconText(false)
+      Text(){
+        SymbolSpan($r('sys.symbol.redo'))
+      }.IconText(false)
+      Text(){
+        SymbolSpan($r('sys.symbol.checkmark'))
+      }.IconText(true).onClick(()=>{
+        this.handleSubmit()
+      })
+    }
+  }
   async handleSubmit(){
     //
     let title = this.memoTitle;
@@ -90,34 +107,17 @@ struct CreateMemo {
   build() {
     //
     NavDestination(){
-      Row(){
-        Text(){
-          SymbolSpan($r('sys.symbol.chevron_left'))
-
+      CustomTitleBar({
+        onBackPress:()=>{
+          this.pageInfos.pushPath({name: 'Home'})
+        },
+        extraContent:()=>{
+          this.titleBarBuilder()
         }
-        .IconText()
-        .onClick(()=>{
-          this.pageInfos.popToIndex(-1)
-        })
-        Row({space: 10}){
-          Text(){
-            SymbolSpan($r('sys.symbol.undo'))
-          }.IconText(false)
-          Text(){
-            SymbolSpan($r('sys.symbol.redo'))
-          }.IconText(false)
-          Text(){
-            SymbolSpan($r('sys.symbol.checkmark'))
-          }.IconText(true).onClick(()=>{
-            this.handleSubmit()
-          })
-        }
-      }
-      .justifyContent(FlexAlign.SpaceBetween)
-      .padding({left:15,right:15})
+      })
       .margin({top: 10})
       .width('100%')
-      .height(50)
+      .height(60)
       MemoDetailView()
       .width('100%').layoutWeight(1)
     }

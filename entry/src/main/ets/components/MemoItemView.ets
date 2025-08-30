@@ -1,4 +1,6 @@
 import { MemoSimpleListItemModel } from "../model/Memo"
+import { CustomTitleBar } from "./CustomTitleBar"
+
 
 @Component
 export struct MemoItemView {
@@ -8,6 +10,13 @@ export struct MemoItemView {
     Column(){
       if(this.isExpand){
         // TODO 跳转到详情页时给另一个样式
+        CustomTitleBar({
+          onBackPress:()=>{
+            //
+          }
+        })
+
+
       }
       if(this.item.isPinned){
         Text('置顶')
