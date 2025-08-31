@@ -5,9 +5,14 @@ import {IMemoRouteParam} from '../types'
 @Component
 export struct MemoDetailView {
   @Prop isEnabled:boolean = true
-  @Link memoTitle:string;
-  controller: RichEditorController = new RichEditorController();
+  @State @Watch('titleChange') memoTitle:string = '';
+  onGetTitle?:(title:string)=>void = () =>{}
+  editorOptions: RichEditorOptions = { controller: new RichEditorController() };
   pageParams:IMemoRouteParam ={id:'-1'}
+
+  titleChange(){
+    this.onGetTitle?.(this.memoTitle)
+  }
   handleGetDetail() {
     let px2vp = this.getUIContext().px2vp
     MemoViewModel.getDetailById(this.pageParams.id).then((data) => {
@@ -17,7 +22,7 @@ export struct MemoDetailView {
         if (typeof (item as RichEditorImageSpanResult).valueResourceStr != 'undefined') {
           let content = item as RichEditorImageSpanResult
 
-          this.controller.addImageSpan(content.valueResourceStr, {
+          this.editorOptions.controller.addImageSpan(content.valueResourceStr, {
             imageStyle: {
               size: content.imageStyle.size.map(item => px2vp(item)) as [Dimension, Dimension],
               layoutStyle: content.imageStyle.layoutStyle,
@@ -27,7 +32,7 @@ export struct MemoDetailView {
           })
         } else {
           let content = item as RichEditorTextSpanResult
-          this.controller.addTextSpan(content.value, {
+          this.editorOptions.controller.addTextSpan(content.value, {
             style: {
               fontColor: content.textStyle.fontColor,
               fontWeight: content.textStyle.fontWeight == 9 ? FontWeight.Bold : FontWeight.Normal,
@@ -43,23 +48,29 @@ export struct MemoDetailView {
       })
     })
   }
+
+  aboutToAppear(): void {
+    this.handleGetDetail()
+  }
   build(){
 
     Column(){
       TextInput({
         placeholder:'标题',
         text: this.memoTitle
-      }).enabled(this.isEnabled)
+      })
 
+        .focusable(this.isEnabled)
         .placeholderFont({
           size: 30
         })
 
 
+
         .caretColor(Color.Orange)
         .fontSize(30)
         .backgroundColor(Color.Transparent)
-      Editor({editorOptions:{controller:this.controller}}).layoutWeight(1).enabled(this.isEnabled).defaultFocus(true)
+      Editor({editorOptions:this.editorOptions,showToolBar:this.isEnabled,isFocusable:this.isEnabled}).layoutWeight(1)
     }
   }
 }

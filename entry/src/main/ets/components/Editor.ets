@@ -10,13 +10,16 @@ const defaultColor = '#E5000000'
 export struct Editor {
   editorOptions: RichEditorOptions = { controller: new RichEditorController() };
   selectionRange: RichEditorRange = {start:0,end:0}
+  @Prop isFocusable: boolean = true
+  @Prop showToolBar:boolean = true
   @State fontSize:number = 16
-  @State showToolBar:boolean = false
+  @State showTextToolBar:boolean = false
   @State isBold:boolean = false
   @State isItalic:boolean = false
   @State isUnderline:boolean = false
   @State textColor:Color|string = defaultColor
   @State paragraphStyle:TextAlign = TextAlign.Start
+
 
 
 
@@ -32,7 +35,7 @@ export struct Editor {
     })
   }
   @Builder
-  toolbarBuilder(){
+  textToolBuilder(){
     Column(){
       Text('样式').width('100%').textAlign(TextAlign.Start).fontSize(24).fontWeight(700)
       Row({space:25}){
@@ -335,6 +338,7 @@ export struct Editor {
         .placeholder('写点什么吧...')
         .height('100%')
         .caretColor(Color.Orange)
+        .focusable(this.isFocusable)
         .onReady(() => {
 
           //
@@ -343,51 +347,53 @@ export struct Editor {
           this.selectionRange = v
           this.setSelectionRangeState(v)
         })
-
-      Row(){
-        List({space:20}){
-          ListItem(){
-            SymbolGlyph($r('sys.symbol.character_viewfinder')).fontSize(30)
-              .onClick(()=>{
-                this.showToolBar = true
-              })
-              .bindSheet($$this.showToolBar, this.toolbarBuilder(), {
-                height:SheetSize.FIT_CONTENT,
-                backgroundColor: Color.White,
-                onWillAppear: () => {
-                  console.log("BindSheet onWillAppear.");
-                },
-                onAppear: () => {
-                  console.log("BindSheet onAppear.");
-                },
-                onWillDisappear: () => {
-                  console.log("BindSheet onWillDisappear.");
-                },
-                onDisappear: () => {
-                  console.log("BindSheet onDisappear.");
+      if(this.showToolBar){
+        Row(){
+          List({space:20}){
+            ListItem(){
+              SymbolGlyph($r('sys.symbol.character_viewfinder')).fontSize(30)
+                .onClick(()=>{
+                  this.showTextToolBar = true
+                })
+                .bindSheet($$this.showTextToolBar, this.textToolBuilder(), {
+                  height:SheetSize.FIT_CONTENT,
+                  backgroundColor: Color.White,
+                  onWillAppear: () => {
+                    console.log("BindSheet onWillAppear.");
+                  },
+                  onAppear: () => {
+                    console.log("BindSheet onAppear.");
+                  },
+                  onWillDisappear: () => {
+                    console.log("BindSheet onWillDisappear.");
+                  },
+                  onDisappear: () => {
+                    console.log("BindSheet onDisappear.");
+                  }
+                })
+            }
+            ListItem(){
+              EmojiSelectView({
+                onEmojiSelect:(url)=>{
+                  this.editorOptions.controller.addImageSpan(url, {
+                    imageStyle: {
+                      size: [30, 30], // 3.2 调整表情在输入框中的尺寸
+                      verticalAlign: ImageSpanAlignment.CENTER,
+                      layoutStyle: { margin: {right:1} }
+                    }
+                  });
                 }
               })
-          }
-          ListItem(){
-            EmojiSelectView({
-              onEmojiSelect:(url)=>{
-                this.editorOptions.controller.addImageSpan(url, {
-                  imageStyle: {
-                    size: [30, 30], // 3.2 调整表情在输入框中的尺寸
-                    verticalAlign: ImageSpanAlignment.CENTER,
-                    layoutStyle: { margin: {right:1} }
-                  }
-                });
-              }
-            })
-          }
-          ListItem(){
-            PhotoSelectView({onImgSelect:(urls)=>{
-              this.editorOptions.controller.addImageSpan(urls[0])
-            }})
-          }
-        }.listDirection(Axis.Horizontal).alignListItem(ListItemAlign.Center).padding({left:15,right:15})
-      }.width('100%').height(40)
+            }
+            ListItem(){
+              PhotoSelectView({onImgSelect:(urls)=>{
+                this.editorOptions.controller.addImageSpan(urls[0])
+              }})
+            }
+          }.listDirection(Axis.Horizontal).alignListItem(ListItemAlign.Center).padding({left:15,right:15})
+        }.width('100%').height(40)
+      }
+
     }.height('100%')
   }
 }

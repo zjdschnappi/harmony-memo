@@ -37,7 +37,7 @@ class Database {
       return new Promise((resolve,reject)=>{
         const config: relationalStore.StoreConfig = {
           name: DB_NAME,
-          securityLevel: relationalStore.SecurityLevel.S2,
+          securityLevel: relationalStore.SecurityLevel.S1,
           encrypt: true
         };
 

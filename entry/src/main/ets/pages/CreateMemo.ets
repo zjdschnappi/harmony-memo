@@ -28,7 +28,7 @@ function IconText(enabled:boolean = true){
 @Component
 struct CreateMemo {
   pageInfos:NavPathStack = new NavPathStack()
-  controller: RichEditorController = new RichEditorController();
+  editorOptions: RichEditorOptions = { controller: new RichEditorController() };
   pageParams:IMemoRouteParam ={id:'-1'}
   @State memoTitle:string = '标题'
 
@@ -51,7 +51,7 @@ struct CreateMemo {
   async handleSubmit(){
     //
     let title = this.memoTitle;
-    let spans = this.controller.getSpans();
+    let spans = this.editorOptions.controller.getSpans();
 
     let memoId = this.pageParams.id
 
@@ -62,7 +62,7 @@ struct CreateMemo {
      //
       await MemoViewModel.updateMemo(memoId,title,spans)
     }
-    this.pageInfos.popToName('Home',{result:null})
+    this.pageInfos.pop()
   }
   aboutToAppear(): void {
     this.getUIContext().setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE)
@@ -73,17 +73,23 @@ struct CreateMemo {
     NavDestination(){
       CustomTitleBar({
         onBackPress:()=>{
-          this.pageInfos.pop()
+          this.pageInfos.pop(false)
         },
         extraContent:()=>{
           this.titleBarBuilder()
         }
       })
         .padding({left:15,right:15})
-      MemoDetailView({memoTitle:this.memoTitle})
+      MemoDetailView(
+        {
+          onGetTitle:(title)=>{
+            this.memoTitle = title
+          },
+          editorOptions:this.editorOptions,
+          pageParams:{id: this.pageParams.id}
+        })
       .width('100%').layoutWeight(1)
     }
-    .systemTransition(NavigationSystemTransitionType.NONE)
     .onReady((ctx)=>{
 
       this.pageInfos = ctx.pathStack

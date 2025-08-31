@@ -5,6 +5,7 @@ import {IMemoRouteParam} from '../types'
 import { RectInfoInPx } from '../utils/ComponentAttrUtils'
 import MemoViewModel from '../viewmodel/MemoViewModel'
 import { CustomTitleBar } from '../components/CustomTitleBar';
+import { MemoDetailView } from '../components/MemoDetailView';
 
 @Builder
 function MemoDetailBuilder(){
@@ -79,32 +80,31 @@ struct MemoDetail {
         Stack({alignContent:Alignment.Start}){
           Column() {
             CustomTitleBar({onBackPress:this.handleBack})
-              .margin({top: 21})
+
               .padding({left: 15,right: 15})
             NodeContainer(this.myNodeController)
+            if(this.AnimationProperties.showDetailContent){
+              MemoDetailView({pageParams:{id:this.pageParams.id},isEnabled:false}).layoutWeight(1)
+              Row(){
+                SymbolGlyph($r('sys.symbol.share')).fontSize(30).onClick(()=>{
+                  this.handleShare()
+                })
+                SymbolGlyph($r('sys.symbol.trash')).fontSize(30).onClick(()=>{
+                  this.handleDelete()
+                })
+                SymbolGlyph($r('sys.symbol.ai_edit')).fontSize(30).onClick(()=>{
+                  this.handleEdit()
+                })
+              }
+              .justifyContent(FlexAlign.SpaceAround)
+              .width('100%')
+            }
           }
           .alignItems(HorizontalAlign.Start)
 
         }
 
-        .position({y:this.AnimationProperties.positionValue})
-        if(this.AnimationProperties.showDetailContent){
-          Row(){
-            SymbolGlyph($r('sys.symbol.share')).fontSize(30).onClick(()=>{
-              this.handleShare()
-            })
-            SymbolGlyph($r('sys.symbol.trash')).fontSize(30).onClick(()=>{
-              this.handleDelete()
-            })
-            SymbolGlyph($r('sys.symbol.ai_edit')).fontSize(30).onClick(()=>{
-              this.handleEdit()
-            })
-          }
-          .justifyContent(FlexAlign.SpaceAround)
-          .padding({left: 20,bottom: 20})
-          .position({bottom:0,left:0})
-          .width('100%')
-        }
+        // .position({y:this.AnimationProperties.positionValue})
 
       }
       .scale({ x: this.AnimationProperties.scaleValue, y: this.AnimationProperties.scaleValue })

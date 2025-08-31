@@ -34,7 +34,6 @@ function HomeBuilder(){
 struct Home {
   @Provide list: MemoSimpleListItemModel[] = []
   @Consume pagePathStackInfos:NavPathStack
-  @StorageProp('dbInitialized') @Watch('dbInit') storageProp:boolean = false
   @State sidebarOpen:boolean = false
   @State currentTab:number = 0
 
@@ -51,8 +50,11 @@ struct Home {
       .padding({top:10,left:20,right:20,bottom:10})
       .borderRadius(20)
   }
-  dbInit(){
-    this.getMemoList()
+  aboutToAppear(){
+    setTimeout(()=>{
+
+      this.getMemoList()
+    },500)
   }
   getMemoList(){
     MemoViewModel.getActiveMemos().then((data)=>{
@@ -166,6 +168,7 @@ struct Home {
       .height('100%')
       .width('100%')
     }
+
     .onReady((context)=>{
       this.pageId = context.pathStack.getAllPathName().length - 1;
       this.registerCustomTransition();
