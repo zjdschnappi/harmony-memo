@@ -90,8 +90,14 @@ class MemoRepository {
 
   // 获取所有活动备忘录
   async getActiveMemos(): Promise<IMemoDetailModel[]> {
-    const all = await MemoDao.getAll();
-    return all.filter(m => !m.isArchived);
+    try {
+      const all = await MemoDao.getAll();
+      return all.filter(m => !m.isArchived);
+    }catch (e){
+      return Promise.resolve([])
+      console.log(e)
+    }
+
   }
 
   // 获取已归档备忘录

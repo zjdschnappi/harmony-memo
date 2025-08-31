@@ -6,6 +6,7 @@ import { IMemoDetailModel, CONTENT_VERSION, IMemoContentItem, IMemoDbEntityModel
 import { BusinessError } from '@ohos.base';
 import { formatDate } from '../utils/DateUtil';
 
+const TABLE_NAME = 'memos'
 
 class MemoDao {
   // 插入备忘录
@@ -26,7 +27,7 @@ class MemoDao {
 
 
 
-    const result = await store.insert('memos', valueBucket as never as  relationalStore.ValuesBucket);
+    const result = await store.insert(TABLE_NAME, valueBucket as never as  relationalStore.ValuesBucket);
     return Number(result);
   }
 
@@ -35,7 +36,7 @@ class MemoDao {
     if (!memo.memoId) throw new Error('Memo ID is required for update');
 
     const store = await Database.getRdbStore();
-    const predicates = new relationalStore.RdbPredicates('memos');
+    const predicates = new relationalStore.RdbPredicates(TABLE_NAME);
     predicates.equalTo('memo_id', memo.memoId);
 
     const valueBucket: relationalStore.ValuesBucket = {
@@ -61,7 +62,7 @@ class MemoDao {
   // 删除备忘录
   async delete(id: string): Promise<number> {
     const store = await Database.getRdbStore();
-    const predicates = new relationalStore.RdbPredicates('memos');
+    const predicates = new relationalStore.RdbPredicates(TABLE_NAME);
     predicates.equalTo('memo_id', id);
 
     // 先获取内容引用以便清理
@@ -74,7 +75,7 @@ class MemoDao {
   // 获取所有备忘录
   async getAll(): Promise<IMemoDetailModel[]> {
     const store = await Database.getRdbStore();
-    const predicates = new relationalStore.RdbPredicates('memos');
+    const predicates = new relationalStore.RdbPredicates(TABLE_NAME);
     predicates.orderByDesc('modified_time');
 
     const columns = [
@@ -89,7 +90,7 @@ class MemoDao {
   // 获取置顶备忘录
   async getPinned(): Promise<IMemoDetailModel[]> {
     const store = await Database.getRdbStore();
-    const predicates = new relationalStore.RdbPredicates('memos');
+    const predicates = new relationalStore.RdbPredicates(TABLE_NAME);
     predicates.equalTo('is_pinned', 1)
       .orderByDesc('modified_time');
 
@@ -100,7 +101,7 @@ class MemoDao {
   // 根据ID获取备忘录
   async getById(id: string): Promise<IMemoDetailModel | null> {
     const store = await Database.getRdbStore();
-    const predicates = new relationalStore.RdbPredicates('memos');
+    const predicates = new relationalStore.RdbPredicates(TABLE_NAME);
     predicates.equalTo('memo_id', id);
 
     const result = await store.query(predicates);

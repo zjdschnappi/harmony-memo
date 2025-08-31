@@ -80,7 +80,7 @@ class MemoViewModel {
     let firstContent = '';
     let imgUrls:ResourceStr[] = []
     let res = content?.[0] as RichEditorTextSpanResult
-    firstContent = res.value;
+    firstContent = res?.value;
 
     content.forEach((item)=>{
       let res = item as RichEditorImageSpanResult;
