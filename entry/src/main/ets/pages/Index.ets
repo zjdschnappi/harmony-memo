@@ -1,5 +1,7 @@
 // Index.ets
 import { AnimateCallback, CustomTransition } from '../customTransition/CustomNavigationUtils';
+import {DebugDB} from '@hadss/debug-db';
+import { common } from '@kit.AbilityKit';
 
 const TAG: string = 'Index';
 
@@ -13,6 +15,7 @@ struct Index {
 
   aboutToAppear(): void {
     this.pagePathStackInfos.pushPath({ name: 'Home' },false);
+    DebugDB.initialize(getContext(this) as common.UIAbilityContext)
   }
 
   private isCustomTransitionEnabled(fromName: string, toName: string): boolean {
