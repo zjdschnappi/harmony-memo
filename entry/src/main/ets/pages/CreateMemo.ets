@@ -62,7 +62,7 @@ struct CreateMemo {
      //
       await MemoViewModel.updateMemo(memoId,title,spans)
     }
-    this.pageInfos.pop()
+    this.pageInfos.pop({result:null})
   }
   aboutToAppear(): void {
     this.getUIContext().setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE)

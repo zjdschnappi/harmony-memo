@@ -64,6 +64,9 @@ export struct MemoDetailView {
         .placeholderFont({
           size: 30
         })
+        .onChange((v)=>{
+          this.memoTitle = v
+        })
 
 
 
