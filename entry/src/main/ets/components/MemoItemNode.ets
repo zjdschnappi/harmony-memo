@@ -20,7 +20,6 @@ export class MemoItemNode extends NodeController {
   private node: BuilderNode<IBuilderProp[]> | null = null;
   private isRemove: boolean = false;
   private item: MemoSimpleListItemModel|null = null
-  private pagePathStackInfos: NavPathStack = new NavPathStack()
   private wrapBuilder: WrappedBuilder<IBuilderProp[]> = wrapBuilder(MemoItemBuilder);
   private needCreate: boolean = false;
   constructor(create: boolean) {
@@ -77,7 +76,7 @@ export class MemoItemNode extends NodeController {
 let gNodeMap: Map<string, MemoItemNode | undefined> = new Map();
 
 export const createNode =
-  (uiContext: UIContext,pagePathStackInfos:NavPathStack, item: MemoSimpleListItemModel, isExpand: boolean): MemoItemNode | undefined => {
+  (uiContext: UIContext, item: MemoSimpleListItemModel, isExpand: boolean): MemoItemNode | undefined => {
     let node = new MemoItemNode(false);
     node.init(uiContext, item, isExpand);
     gNodeMap.set(item.memoId, node);

@@ -103,7 +103,7 @@ export default struct MemoView {
       }
     })
   }
-  handleDetail(params:IMemoRouteParam){
+  handleDetail=(params:IMemoRouteParam)=>{
     let p:Promise<void> =  new Promise((resolve,reject)=>{
 
       this.pagePathStackInfos.pushPathByName('MemoDetail',params,()=>{

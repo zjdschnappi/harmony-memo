@@ -6,7 +6,6 @@ import { createNode, getNode, MemoItemNode } from './MemoItemNode';
 
 @Component
 export struct MemoItem {
-  @Consume pagePathStackInfos:NavPathStack
   @ObjectLink item:MemoSimpleListItemModel
   @State memoItemNode: MemoItemNode | undefined = new MemoItemNode(false)
   onDetail:((item:IMemoRouteParam)=>Promise<void>)|null= null
@@ -41,7 +40,7 @@ export struct MemoItem {
     let node = getNode(this.item.memoId);
     if (node == undefined) {
       // 新建自定义节点
-      node = createNode(this.getUIContext(),this.pagePathStackInfos,this.item,false);
+      node = createNode(this.getUIContext(),this.item,false);
     }
     this.memoItemNode = node
   }
