@@ -1,10 +1,9 @@
 import { KeyboardAvoidMode } from "@ohos.arkui.UIContext";
 import MemoViewModel from '../viewmodel/MemoViewModel'
 import { IMemoRouteParam,  } from "../types";
-import { IMemoContentItem } from "../model/Memo";
-import { Editor } from "../components/Editor";
 import { MemoDetailView } from "../components/MemoDetailView";
 import { CustomTitleBar } from "../components/CustomTitleBar";
+import EventManager ,{EventTypes} from '../utils/EventManager'
 
 @Builder
 export function CreateMemoBuilder(){
@@ -23,14 +22,12 @@ function IconText(enabled:boolean = true){
   .textAlign(TextAlign.Center)
 }
 
-
-@Preview
-@Component
+@ComponentV2
 struct CreateMemo {
-  pageInfos:NavPathStack = new NavPathStack()
-  editorOptions: RichEditorOptions = { controller: new RichEditorController() };
-  pageParams:IMemoRouteParam ={id:'-1'}
-  @State memoTitle:string = '标题'
+  private pageInfos:NavPathStack = new NavPathStack()
+  private editorOptions: RichEditorOptions = { controller: new RichEditorController() };
+  private pageParams:IMemoRouteParam ={id:'-1'}
+  @Local memoTitle:string = '标题'
 
   @Builder
   titleBarBuilder(){
@@ -61,8 +58,10 @@ struct CreateMemo {
     }else {
      //
       await MemoViewModel.updateMemo(memoId,title,spans)
+      EventManager.emit(EventTypes.FETCH_MEMO_DETAIL)
     }
-    this.pageInfos.pop({result:null})
+    EventManager.emit(EventTypes.FETCH_MEMO_LIST)
+    this.pageInfos.pop()
   }
   aboutToAppear(): void {
     this.getUIContext().setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE)

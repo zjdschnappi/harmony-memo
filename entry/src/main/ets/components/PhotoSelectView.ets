@@ -7,10 +7,10 @@ interface IItem{
   text: string;
   onClick:()=>void
 }
-@Component
+@ComponentV2
 export struct PhotoSelectView {
-  @State show:boolean = false
-  onImgSelect:(item:string[])=>void=()=>{}
+  @Local show:boolean = false
+  @Param onImgSelect:(item:string[])=>void=()=>{}
 
   getList(){
     let list:IItem[] = [

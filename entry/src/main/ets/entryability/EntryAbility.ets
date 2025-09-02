@@ -3,6 +3,7 @@ import { hilog } from '@kit.PerformanceAnalysisKit';
 import { display, window } from '@kit.ArkUI';
 import { WindowUtils } from '../utils/WindowUtils';
 import Database from '../database/Database';
+import EventManager, { EventTypes } from '../utils/EventManager'
 
 const DOMAIN = 0x0000;
 
@@ -13,6 +14,9 @@ export default class EntryAbility extends UIAbility {
      // 初始化数据库
      Database.init(this.context).then(()=>{
        AppStorage.setOrCreate('dbInitialized',true)
+       setTimeout(()=>{
+         EventManager.emit(EventTypes.FETCH_MEMO_LIST)
+       },500)
      });
     this.context.getApplicationContext().setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_NOT_SET);
     hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onCreate');

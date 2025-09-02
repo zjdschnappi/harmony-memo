@@ -2,10 +2,10 @@ import { MemoSimpleListItemModel } from "../model/Memo"
 import { CustomTitleBar } from "./CustomTitleBar"
 
 
-@Component
+@ComponentV2
 export struct  MemoItemView {
-  @ObjectLink item: MemoSimpleListItemModel
-  @Prop isExpand:boolean = false
+  @Param @Require item: MemoSimpleListItemModel
+  @Param isExpand:boolean = false
   build(){
     if(this.isExpand){
 

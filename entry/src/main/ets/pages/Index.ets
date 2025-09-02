@@ -6,9 +6,9 @@ import { common } from '@kit.AbilityKit';
 const TAG: string = 'Index';
 
 @Entry
-@Component
+@ComponentV2
 struct Index {
-  @Provide pagePathStackInfos: NavPathStack = new NavPathStack();
+  @Provider() pagePathStackInfos: NavPathStack = new NavPathStack();
   // 允许进行自定义转场的页面名称
   private allowedCustomTransitionFromPageName: string[] = ['Home'];
   private allowedCustomTransitionToPageName: string[] = ['MemoDetail'];

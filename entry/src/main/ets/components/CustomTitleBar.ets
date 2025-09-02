@@ -11,10 +11,10 @@ function IconText(enabled:boolean = true){
   .textAlign(TextAlign.Center)
 }
 
-@Component
+@ComponentV2
 export struct CustomTitleBar {
   @BuilderParam extraContent?: () => void  // 定义插槽
-  onBackPress?:()=> void = ()=> {}
+  @Param onBackPress?:()=> void = ()=> {}
   build() {
 
     Row(){

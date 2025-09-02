@@ -5,11 +5,11 @@ import { MemoItem } from './MemoItem'
 
 
 
-@Component
+@ComponentV2
 struct ListItemSwipeEnd {
-  @ObjectLink item:MemoSimpleListItemModel
-  onPinTop:()=>void = ()=>{}
-  onDelete:()=>void = ()=>{}
+  @Param @Require item:MemoSimpleListItemModel
+  @Param onPinTop:()=>void = ()=>{}
+  @Param onDelete:()=>void = ()=>{}
   build(){
     Row({space: 10}){
       SymbolGlyph(
@@ -30,10 +30,10 @@ struct ListItemSwipeEnd {
   }
 }
 
-@Component
+@ComponentV2
 export default struct MemoView {
-  @Consume list: MemoSimpleListItemModel[]
-  @Consume pagePathStackInfos:NavPathStack
+  @Consumer() list: MemoSimpleListItemModel[] = []
+  @Consumer() pagePathStackInfos:NavPathStack = new NavPathStack()
   scroller:ListScroller = new ListScroller()
 
   @Builder
@@ -104,19 +104,7 @@ export default struct MemoView {
     })
   }
   handleDetail=(params:IMemoRouteParam)=>{
-    let p:Promise<void> =  new Promise((resolve,reject)=>{
-
-      this.pagePathStackInfos.pushPathByName('MemoDetail',params,()=>{
-        this.getMemoList()
-      })
-      resolve()
-    })
-    return p
-  }
-  getMemoList(){
-    MemoViewModel.getActiveMemos().then((data)=>{
-      this.list = data
-    })
+    this.pagePathStackInfos.pushPathByName('MemoDetail',params)
   }
 
   build(){
@@ -126,7 +114,9 @@ export default struct MemoView {
       List({scroller:this.scroller}){
         ForEach(this.list,(item:MemoSimpleListItemModel)=>{
           ListItem(){
-            MemoItem({item:item,onDetail:this.handleDetail})
+            MemoItem({item:item,onDetail:(params:IMemoRouteParam)=>{
+               this.handleDetail(params)
+            }})
           }
 
           .margin({top:15})

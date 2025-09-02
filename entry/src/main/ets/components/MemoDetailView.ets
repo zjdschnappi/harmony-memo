@@ -1,15 +1,18 @@
 import { Editor } from '../components/Editor'
 import MemoViewModel from '../viewmodel/MemoViewModel'
 import { IMemoContentItem } from "../model/Memo";
-import {IMemoRouteParam} from '../types'
-@Component
-export struct MemoDetailView {
-  @Prop isEnabled:boolean = true
-  @State @Watch('titleChange') memoTitle:string = '';
-  onGetTitle?:(title:string)=>void = () =>{}
-  editorOptions: RichEditorOptions = { controller: new RichEditorController() };
-  pageParams:IMemoRouteParam ={id:'-1'}
+import { IMemoRouteParam } from '../types'
+import EventManager, {EventTypes} from '../utils/EventManager'
 
+@ComponentV2
+export struct MemoDetailView {
+  @Param isEnabled:boolean = true
+  @Local memoTitle:string = ''
+  @Param  onGetTitle?:(title:string)=>void = () =>{}
+  @Param editorOptions: RichEditorOptions = { controller: new RichEditorController() };
+  @Param pageParams:IMemoRouteParam ={id:'-1'}
+
+  @Monitor('memoTitle')
   titleChange(){
     this.onGetTitle?.(this.memoTitle)
   }
@@ -51,6 +54,12 @@ export struct MemoDetailView {
 
   aboutToAppear(): void {
     this.handleGetDetail()
+    EventManager.on(EventTypes.FETCH_MEMO_DETAIL,()=>{
+      this.handleGetDetail()
+    })
+  }
+  aboutToDisappear(): void {
+    EventManager.off(EventTypes.FETCH_MEMO_DETAIL)
   }
   build(){
 

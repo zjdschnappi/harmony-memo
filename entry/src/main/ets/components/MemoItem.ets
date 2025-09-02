@@ -2,17 +2,18 @@ import { MemoSimpleListItemModel } from '../model/Memo';
 import { IMemoRouteParam,IRectInfoInPx } from '../types';
 import { ComponentAttrUtils, RectInfoInPx } from '../utils/ComponentAttrUtils';
 import { WindowUtils } from '../utils/WindowUtils';
-import { createNode, getNode, MemoItemNode } from './MemoItemNode';
+import { createNode, deleteNode, getNode, MemoItemNode } from './MemoItemNode';
 
-@Component
+@ComponentV2
 export struct MemoItem {
-  @ObjectLink item:MemoSimpleListItemModel
-  @State memoItemNode: MemoItemNode | undefined = new MemoItemNode(false)
-  onDetail:((item:IMemoRouteParam)=>Promise<void>)|null= null
+  @Param @Require item:MemoSimpleListItemModel
+  @Local memoItemNode: MemoItemNode | undefined = new MemoItemNode(false)
+  @Param onDetail:((item:IMemoRouteParam)=>void)|null= null
 
-  private doFinishTransition(id:string): void {
-    // PageTwo结束转场时将节点从PageTwo迁移回PageOne
-    this.memoItemNode = getNode(id);
+  private doFinishTransition(id:string){
+    // MemoDetail结束转场时将节点从MemoDetail迁移回Home
+    deleteNode(id)
+    this.memoItemNode = createNode(this.getUIContext(),this.item,false);
     this.memoItemNode?.update(false)
   }
 
@@ -28,12 +29,12 @@ export struct MemoItem {
       }
     }
 
-   this.onDetail?.(param).then(()=>{
-     // 自定义节点从Home下树
-     if (this.memoItemNode != undefined) {
-       this.memoItemNode.onRemove();
-     }
-   })
+   this.onDetail?.(param)
+   // 自定义节点从Home下树
+   if (this.memoItemNode != undefined) {
+     this.memoItemNode.onRemove();
+   }
+
 
   }
   aboutToAppear(): void {

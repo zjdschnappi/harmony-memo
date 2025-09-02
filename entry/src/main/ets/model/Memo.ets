@@ -96,16 +96,16 @@ export interface IMemoUpdateModel {
 }
 
 
-@Observed
+@ObservedV2
 export class MemoSimpleListItemModel implements  IMemoSimpleListItemModel {
-  memoId:string
-  title:string
-  simpleContent:string
-  createdTime:string
-  modifiedTime: string
-  imgUrl:ResourceStr[]
-  isPinned: boolean
-  isArchived: boolean
+  @Trace memoId:string
+  @Trace title:string
+  @Trace simpleContent:string
+  @Trace createdTime:string
+  @Trace modifiedTime: string
+  @Trace imgUrl:ResourceStr[]
+  @Trace isPinned: boolean
+  @Trace isArchived: boolean
 
   constructor(
     memoId: string,

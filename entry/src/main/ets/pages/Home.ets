@@ -4,6 +4,7 @@ import MemoViewModel from '../viewmodel/MemoViewModel'
 import {  MemoSimpleListItemModel } from '../model/Memo';
 import { IMemoRouteParam } from '../types';
 import { CustomTransition } from '../customTransition/CustomNavigationUtils';
+import EventManager, { EventTypes } from '../utils/EventManager'
 
 enum TabBarEnum {
   TODO = 'TODO',
@@ -30,12 +31,12 @@ function HomeBuilder(){
   Home()
 }
 
-@Component
+@ComponentV2
 struct Home {
-  @Provide list: MemoSimpleListItemModel[] = []
-  @Consume pagePathStackInfos:NavPathStack
-  @State sidebarOpen:boolean = false
-  @State currentTab:number = 0
+  @Provider() list: MemoSimpleListItemModel[] = []
+  @Consumer() pagePathStackInfos:NavPathStack = new NavPathStack()
+  @Local sidebarOpen:boolean = false
+  @Local currentTab:number = 0
 
   private pageId: number = -1;
 
@@ -51,10 +52,12 @@ struct Home {
       .borderRadius(20)
   }
   aboutToAppear(){
-    setTimeout(()=>{
-
+    EventManager.on(EventTypes.FETCH_MEMO_LIST,()=>{
       this.getMemoList()
-    },500)
+    })
+  }
+  aboutToDisappear(): void {
+    EventManager.off(EventTypes.FETCH_MEMO_LIST)
   }
   getMemoList(){
     MemoViewModel.getActiveMemos().then((data)=>{
@@ -141,9 +144,7 @@ struct Home {
                 .fontSize(30)
                 .onClick(()=>{
                   const params:IMemoRouteParam= {id:'-1'}
-                  this.pagePathStackInfos.pushPathByName('CreateMemo',params,()=>{
-                    this.getMemoList()
-                  })
+                  this.pagePathStackInfos.pushPathByName('CreateMemo',params)
                 })
             }.width('100%')
             .justifyContent(FlexAlign.Center)
