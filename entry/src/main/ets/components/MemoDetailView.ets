@@ -19,7 +19,7 @@ export struct MemoDetailView {
   handleGetDetail() {
     let px2vp = this.getUIContext().px2vp
     MemoViewModel.getDetailById(this.pageParams.id).then((data) => {
-
+      this.editorOptions.controller.deleteSpans()
       this.memoTitle = data?.title || ''
       data?.content?.forEach((item: IMemoContentItem) => {
         if (typeof (item as RichEditorImageSpanResult).valueResourceStr != 'undefined') {

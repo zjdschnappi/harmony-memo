@@ -6,6 +6,65 @@ import { IMemoRouteParam } from '../types';
 import { CustomTransition } from '../customTransition/CustomNavigationUtils';
 import EventManager, { EventTypes } from '../utils/EventManager'
 
+/**
+ * 同步两个数组数据
+ * @param {Array} oldArray - 原始数组（将被修改）
+ * @param {Array} newArray - 新数据数组
+ */
+interface IParam {
+  item: MemoSimpleListItemModel;
+  index:number
+}
+function syncArrays(oldArray:MemoSimpleListItemModel[], newArray:MemoSimpleListItemModel[]) {
+  // 创建ID映射以便快速查找
+  const oldMap = new Map<string,IParam>();
+  oldArray.forEach((item, index) => oldMap.set(item.memoId, { item, index }));
+
+  const newMap = new Map<string,MemoSimpleListItemModel>();
+  newArray.forEach(item => newMap.set(item.memoId, item));
+
+  // 找出需要移除的数据（在旧数组但不在新数组中）
+  const toRemove:number[] = [];
+  for (let i = oldArray.length - 1; i >= 0; i--) {
+    if (!newMap.has(oldArray[i].memoId)) {
+      toRemove.push(i);
+    }
+  }
+
+  // 从后往前删除，避免索引变化问题
+  toRemove.forEach(index => {
+    oldArray.splice(index, 1);
+  });
+
+  // 更新和新增数据
+  newArray.forEach(newItem => {
+    const oldEntry = oldMap.get(newItem.memoId);
+
+    if (oldEntry) {
+      // 更新现有项
+      const oldItem = oldEntry.item;
+      oldItem.title = newItem.title
+      oldItem.simpleContent = newItem.simpleContent
+      oldItem.modifiedTime = newItem.modifiedTime
+      oldItem.imgUrl = newItem.imgUrl
+      oldItem.isPinned = newItem.isPinned
+      oldItem.isArchived = newItem.isArchived
+
+    } else {
+      // 新增项
+      oldArray.push(new MemoSimpleListItemModel(
+        newItem.memoId,
+        newItem.title,
+        newItem.simpleContent,
+        newItem.createdTime,
+        newItem.modifiedTime,
+        newItem.imgUrl,
+        newItem.isPinned,
+        newItem.isArchived,
+      ));
+    }
+  });
+}
 enum TabBarEnum {
   TODO = 'TODO',
   MEMO = 'MEMO'
@@ -60,20 +119,8 @@ struct Home {
     EventManager.off(EventTypes.FETCH_MEMO_LIST)
   }
   getMemoList(){
-    MemoViewModel.getActiveMemos().then((data)=>{
-      this.list = data.map(item=>{
-        return new MemoSimpleListItemModel(
-          item.memoId,
-          item.title,
-          item.simpleContent,
-          item.createdTime,
-          item.modifiedTime,
-          item.imgUrl,
-          item.isPinned,
-          item.isArchived,
-        )
-
-      })
+    MemoViewModel.getActiveMemos().then((data)=> {
+      syncArrays(this.list,data)
     })
   }
   build() {

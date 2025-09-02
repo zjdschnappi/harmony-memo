@@ -76,7 +76,7 @@ class MemoDao {
   async getAll(): Promise<IMemoDetailModel[]> {
     const store = await Database.getRdbStore();
     const predicates = new relationalStore.RdbPredicates(TABLE_NAME);
-    predicates.orderByDesc('modified_time');
+    predicates.orderByDesc('is_pinned').orderByDesc('modified_time');
 
     const columns = [
       'id', 'memo_id', 'content','title', 'content_version', 'is_pinned', 'is_archived',

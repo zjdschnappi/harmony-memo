@@ -69,6 +69,8 @@ class MemoViewModel {
          title: item.title,
          simpleContent:simpleContent,
          imgUrl:imgUrls,
+         isPinned:item.isPinned,
+         isArchived: item.isArchived,
          createdTime:item.createdTime,
          modifiedTime:item.modifiedTime
        } as IMemoSimpleListItemModel
