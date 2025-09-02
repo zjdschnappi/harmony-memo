@@ -11,6 +11,10 @@
     {
       "name": "EntryAbility_label",
       "value": "备忘录"
+    },
+    {
+      "name": "system_share",
+      "value": "系统分享"
     }
   ]
 }

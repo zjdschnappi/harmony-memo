@@ -6,6 +6,7 @@ import { RectInfoInPx } from '../utils/ComponentAttrUtils'
 import MemoViewModel from '../viewmodel/MemoViewModel'
 import { CustomTitleBar } from '../components/CustomTitleBar';
 import { MemoDetailView } from '../components/MemoDetailView';
+import { SharePanel } from '../components/SharePanel';
 
 @Builder
 function MemoDetailBuilder(){
@@ -86,9 +87,7 @@ struct MemoDetail {
             if(this.AnimationProperties.showDetailContent){
               MemoDetailView({pageParams:{id:this.pageParams.id},isEnabled:false}).layoutWeight(1)
               Row(){
-                SymbolGlyph($r('sys.symbol.share')).fontSize(30).onClick(()=>{
-                  this.handleShare()
-                })
+                SharePanel()
                 SymbolGlyph($r('sys.symbol.trash')).fontSize(30).onClick(()=>{
                   this.handleDelete()
                 })
