@@ -85,9 +85,9 @@ struct MemoDetail {
               .padding({left: 15,right: 15})
             NodeContainer(this.myNodeController)
             if(this.AnimationProperties.showDetailContent){
-              MemoDetailView({pageParams:{id:this.pageParams.id},isEnabled:false}).layoutWeight(1)
+              MemoDetailView({pageParams:{id:this.pageParams.id},isEnabled:false}).layoutWeight(1).id('MEME_DETAIL')
               Row(){
-                SharePanel()
+                SharePanel({targetViewComponentId:'MEME_DETAIL'})
                 SymbolGlyph($r('sys.symbol.trash')).fontSize(30).onClick(()=>{
                   this.handleDelete()
                 })
