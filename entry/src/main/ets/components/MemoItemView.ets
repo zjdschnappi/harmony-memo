@@ -14,7 +14,7 @@ export struct  MemoItemView {
 
     }else {
 
-      Column(){
+      Row(){
 
         if(this.item.isPinned){
           Text('置顶')
@@ -23,17 +23,19 @@ export struct  MemoItemView {
             .position({left:-15,top:-15})
             .fontColor(Color.White).fontSize(12)
         }
+        Column({space: 10}){
 
-        Text(this.item.title).fontSize(18).fontWeight(700)
-        Row(){
-          Text(this.item.simpleContent).fontSize(16)
-          Text(this.item.modifiedTime).fontSize(12)
-        }
-        .justifyContent(FlexAlign.SpaceBetween).width('100%')
+          Text(this.item.title).fontSize(18).fontWeight(700).width('100%')
+          Row({space: 10}){
+            Text(this.item.simpleContent).fontSize(16)
+            Text(this.item.modifiedTime).fontSize(12)
+          }
+          .width('100%')
+        }.layoutWeight(1)
+        Image(this.item.imgUrl?.[0]).objectFit(ImageFit.Contain).width(50).height(50)
       }
-      .padding(15)
+      .padding(10)
       .width('100%')
-      .alignItems(HorizontalAlign.Start)
     }
 
 

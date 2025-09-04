@@ -17,7 +17,7 @@ export struct MemoDetailView {
     this.onGetTitle?.(this.memoTitle)
   }
   handleGetDetail() {
-    let px2vp = this.getUIContext().px2vp
+    let context = this.getUIContext()
     MemoViewModel.getDetailById(this.pageParams.id).then((data) => {
       this.editorOptions.controller.deleteSpans()
       this.memoTitle = data?.title || ''
@@ -27,7 +27,7 @@ export struct MemoDetailView {
 
           this.editorOptions.controller.addImageSpan(content.valueResourceStr, {
             imageStyle: {
-              size: content.imageStyle.size.map(item => px2vp(item)) as [Dimension, Dimension],
+              size: content.imageStyle.size.map(item => context.px2vp(item)) as [Dimension, Dimension],
               layoutStyle: content.imageStyle.layoutStyle,
               verticalAlign: content.imageStyle.verticalAlign,
               objectFit: content.imageStyle.objectFit
