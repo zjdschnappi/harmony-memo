@@ -37,6 +37,15 @@ export default struct MemoView {
   scroller:ListScroller = new ListScroller()
 
   @Builder
+  contextBuilder(id:string) {
+    Menu() {
+      MenuItem({ startIcon: $r('sys.symbol.trash'), content: "删除" }).onClick(()=>{
+        this.handleDelete(id)
+      })
+    }
+  }
+
+  @Builder
   endBuilder(item:MemoSimpleListItemModel){
     ListItemSwipeEnd({
       item:item,
@@ -117,8 +126,12 @@ export default struct MemoView {
             MemoItem({item:item,onDetail:(params:IMemoRouteParam)=>{
                this.handleDetail(params)
             }})
-          }
 
+          }
+          .bindContextMenu(this.contextBuilder(item.memoId),ResponseType.LongPress,{
+            preview: MenuPreviewMode.IMAGE,
+            previewAnimationOptions: {scale: [0.8, 1.0]},
+          })
           .margin({top:15})
           .backgroundColor(Color.White)
           .swipeAction({

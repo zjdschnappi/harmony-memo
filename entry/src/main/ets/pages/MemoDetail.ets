@@ -7,6 +7,7 @@ import MemoViewModel from '../viewmodel/MemoViewModel'
 import { CustomTitleBar } from '../components/CustomTitleBar';
 import { MemoDetailView } from '../components/MemoDetailView';
 import { SharePanel } from '../components/SharePanel';
+import EventManager, { EventTypes } from '../utils/EventManager';
 
 @Builder
 function MemoDetailBuilder(){
@@ -61,6 +62,8 @@ struct MemoDetail {
       if(value.index==1) {
         MemoViewModel.deleteMemo(this.pageParams.id).then(()=>{
           this.pageInfos.pop()
+
+          EventManager.emit(EventTypes.FETCH_MEMO_LIST)
         })
       }else {
       }
