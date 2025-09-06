@@ -4,6 +4,10 @@ import { emitter, Callback } from '@kit.BasicServicesKit';
 export enum EventTypes  {
   FETCH_MEMO_LIST = 0, // 备忘录列表
   FETCH_MEMO_DETAIL = 1, // 备忘录详情
+  // ---------------
+
+  EDITOR_SELECTION_CHANGE= 3 //编辑器内选区范围
+
   // ... 其他事件根据需要继续添加
 }
 

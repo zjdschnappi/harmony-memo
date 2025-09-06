@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { EmojiModel } from '../model/Memo';
+import { EmojiModel } from '../../model/Memo';
 
 // 表情详细信息
 @Component

@@ -1,4 +1,4 @@
-import { EmojiData, EmojiModel } from "../model/Memo";
+import { EmojiData, EmojiModel } from "../../model/Memo";
 import { EmojiDetail } from "./EmojiDetail";
 
 // 表情键盘

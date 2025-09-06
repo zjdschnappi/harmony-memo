@@ -1,4 +1,4 @@
-import { Editor } from '../components/Editor'
+import { Editor } from './Editor/Editor'
 import MemoViewModel from '../viewmodel/MemoViewModel'
 import { IMemoContentItem } from "../model/Memo";
 import { IMemoRouteParam } from '../types'
