@@ -21,6 +21,11 @@ export interface IColorItemParams {
 
 export interface ITextDecoratorItem{
   icon: Resource;
+  type: 'underline'|'italic'|'bold'|'textAlignLeft'|'textAlignCenter'|'textAlignRight';
+  active?:boolean;
+}
+export interface ITextDirectionItem{
+  icon: Resource;
   onClick:()=>void;
   active?:boolean;
 }

@@ -1,4 +1,6 @@
-import { IColorItemParams, ITextColorItem, ITextDecoratorItem, ITypingStyleParam } from "../../types";
+import { IColorItemParams, ITextColorItem, ITextDecoratorItem,
+  ITextDirectionItem,
+  ITypingStyleParam } from "../../types";
 import EventManager ,{ EventTypes } from "../../utils/EventManager";
 
 const defaultColor = '#E5000000'
@@ -44,11 +46,44 @@ export struct TextFormatToolView {
             SymbolSpan(item.icon).fontColor(item.active?[Color.White]:[Color.Black]).fontSize(30)
           }
           .backgroundColor(item.active?Color.Orange:Color.Transparent)
-          .borderRadius('50%').width(40).height(40).textAlign(TextAlign.Center).onClick(item.onClick)
+          .borderRadius('50%').width(40).height(40).textAlign(TextAlign.Center).onClick(()=>{
+            if(item.type=='underline'||item.type=='italic'||item.type=='bold'){
+              let styles:ITypingStyleParam = {}
+              switch (item.type){
+                case 'underline':{
+                  this.isUnderline=!this.isUnderline
+                  styles = {isUnderline:this.isUnderline}
+                }
+                case 'italic':{
+                  this.isItalic = !this.isItalic
+                  styles = {isItalic:this.isItalic}
+                }
+                case 'bold':{
+                  this.isBold = !this.isBold
+                  styles = {isBold:this.isBold}
+                }
+
+              }
+              if(this.checkIsSelectRange()){
+                this.controller.updateSpanStyle({
+                  start: this.selectionRange.start,
+                  end: this.selectionRange.end,
+                  textStyle: this.getTypingStyles(styles)
+                })
+              }else {
+                this.controller.setTypingStyle(this.getTypingStyles(styles))
+              }
+
+            }
+          })
 
         })
 
-      }.width('100%').height(60).margin({top: 15}).justifyContent(FlexAlign.SpaceBetween)
+      }
+      .width('100%')
+      .height(60).
+      margin({top: 15})
+      .justifyContent(FlexAlign.SpaceBetween)
       Divider().width('100%')
       Row({space:25}){
         ForEach(this.textDirectionItems(),(item:ITextDecoratorItem)=>{
@@ -121,97 +156,56 @@ export struct TextFormatToolView {
     let list:ITextDecoratorItem[] =  [
       {
         icon: $r('sys.symbol.pencil_line_1'),
-        onClick:()=>{
-          this.isUnderline=!this.isUnderline
-          if(this.checkIsSelectRange()){
-            this.controller.updateSpanStyle({
-              start: this.selectionRange.start,
-              end: this.selectionRange.end,
-              textStyle: this.getTypingStyles({isUnderline:this.isUnderline})
-            })
-          }else {
-            this.controller.setTypingStyle(this.getTypingStyles({isUnderline:this.isUnderline}))
-          }
-
-        },
+        type:'underline',
         active: this.isUnderline
       },
       {
         icon: $r('sys.symbol.character_viewfinder'),
-        onClick:()=>{
-          this.isBold = !this.isBold
-          if(this.checkIsSelectRange()){
-            this.controller.updateSpanStyle({
-              start: this.selectionRange.start,
-              end: this.selectionRange.end,
-              textStyle:this.getTypingStyles({isBold:this.isBold})
-            })
-          }else {
-            this.controller.setTypingStyle(this.getTypingStyles({isBold:this.isBold}))
-          }
-
-        },
+        type: 'bold',
         active: this.isBold
       },
       {
         icon: $r('sys.symbol.selector'),
-        onClick:()=>{
-          this.isItalic = !this.isItalic
-          if(this.checkIsSelectRange()){
-            this.controller.updateSpanStyle({
-              start: this.selectionRange.start,
-              end: this.selectionRange.end,
-              textStyle: this.getTypingStyles({isItalic:this.isItalic})
-            })
-          }else {
-            this.controller.setTypingStyle(this.getTypingStyles({isItalic:this.isItalic}))
-          }
-
-        },
+        type: 'italic',
         active: this.isItalic
       },
       {
         icon: $r('sys.symbol.text_alignleft'),
-        onClick:()=>{
-          this.paragraphStyle = TextAlign.Start
-          this.controller.updateParagraphStyle({
-            style: {
-              textAlign: TextAlign.Start
-            }
-          })
-        },
+        type: 'textAlignLeft',
         active: this.paragraphStyle == TextAlign.Start
       },
       {
         icon: $r('sys.symbol.text_aligncenter'),
-        onClick:()=>{
-          this.paragraphStyle = TextAlign.Center
-          this.controller.updateParagraphStyle({
-            style: {
-              textAlign: TextAlign.Center
-            }
-          })
-        },
+        // onClick:()=>{
+        //   this.paragraphStyle = TextAlign.Center
+        //   this.controller.updateParagraphStyle({
+        //     style: {
+        //       textAlign: TextAlign.Center
+        //     }
+        //   })
+        // },
+        type: 'textAlignCenter',
         active: this.paragraphStyle == TextAlign.Center
       },
 
       {
         icon: $r('sys.symbol.text_alignright'),
-        onClick:()=>{
-          this.paragraphStyle = TextAlign.End
-          this.controller.updateParagraphStyle({
-            style: {
-              textAlign: TextAlign.End
-            }
-          })
-        },
+        // onClick:()=>{
+        //   this.paragraphStyle = TextAlign.End
+        //   this.controller.updateParagraphStyle({
+        //     style: {
+        //       textAlign: TextAlign.End
+        //     }
+        //   })
+        // },
+        type: 'textAlignRight',
         active: this.paragraphStyle == TextAlign.End
       },
     ]
     return list
   }
   textDirectionItems(){
-    let list:ITextDecoratorItem[] =  [
+    let list:ITextDirectionItem[] =  [
       {
         icon: $r('sys.symbol.indent_right'),
         onClick:()=>{}
