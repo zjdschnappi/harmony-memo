@@ -6,7 +6,8 @@ export enum EventTypes  {
   FETCH_MEMO_DETAIL = 1, // 备忘录详情
   // ---------------
 
-  EDITOR_SELECTION_CHANGE= 3 //编辑器内选区范围
+  EDITOR_SELECTION_CHANGE= 3, //编辑器内选区范围
+  EDITOR_ABOUT_TO_INPUT = 4
 
   // ... 其他事件根据需要继续添加
 }

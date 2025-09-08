@@ -2,7 +2,7 @@
 import { EmojiSelectView } from "./EmojiSelectView";
 import { PhotoSelectView } from "./PhotoSelectView";
 import { TextFormatToolView } from "./TextFormatToolView";
-import EventManager , {EventTypes} from '../../utils/EventManager'
+import EventManager , { EventTypes } from '../../utils/EventManager'
 
 @ComponentV2
 export struct Editor {
@@ -25,7 +25,12 @@ export struct Editor {
         .onReady(() => {
 
           //
-        }).layoutWeight(1)
+        })
+        .aboutToIMEInput((v)=>{
+          EventManager.emit(EventTypes.EDITOR_ABOUT_TO_INPUT,{data:v})
+          return false
+        })
+        .layoutWeight(1)
         .onSelectionChange(v=>{
 
           EventManager.emit(EventTypes.EDITOR_SELECTION_CHANGE,{data:v})
