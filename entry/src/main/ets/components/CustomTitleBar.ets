@@ -14,18 +14,22 @@ function IconText(enabled:boolean = true){
 @ComponentV2
 export struct CustomTitleBar {
   @BuilderParam extraContent?: () => void  // 定义插槽
+  @BuilderParam title?: () => void  // 定义插槽
   @Param onBackPress?:()=> void = ()=> {}
   build() {
 
     Row(){
-      Text(){
-        SymbolSpan($r('sys.symbol.chevron_left'))
+      Row({space: 10}){
+        Text(){
+          SymbolSpan($r('sys.symbol.chevron_left'))
 
+        }
+        .IconText()
+        .onClick(()=>{
+          this.onBackPress?.()
+        })
+        this.title?.()
       }
-      .IconText()
-      .onClick(()=>{
-        this.onBackPress?.()
-      })
      this.extraContent?.()
     }
     .alignItems(VerticalAlign.Center)

@@ -9,6 +9,9 @@ export struct MemoItem {
   @Param @Require item:MemoSimpleListItemModel
   @Local memoItemNode: MemoItemNode | undefined = new MemoItemNode(false)
   @Param onDetail:((item:IMemoRouteParam)=>void)|null= null
+  @Param checkable: boolean = false;
+  @Param checked: boolean = false;
+  @Param onCheck:(id:string,checked:boolean)=>void = ()=>{}
 
   private doFinishTransition(id:string){
     // MemoDetail结束转场时将节点从MemoDetail迁移回Home
@@ -28,12 +31,14 @@ export struct MemoItem {
         this.doFinishTransition(item.memoId)
       }
     }
+    if(this.onDetail){
 
-   this.onDetail?.(param)
-   // 自定义节点从Home下树
-   if (this.memoItemNode != undefined) {
-     this.memoItemNode.onRemove();
-   }
+       this.onDetail?.(param)
+       // 自定义节点从Home下树
+       if (this.memoItemNode != undefined) {
+         this.memoItemNode.onRemove();
+       }
+    }
 
 
   }
@@ -46,10 +51,18 @@ export struct MemoItem {
     this.memoItemNode = node
   }
   build() {
-    Column(){
+    Row(){
+      if(this.checkable){
+        Checkbox()
+          .select(this.checked)
+          .onChange((v)=>{
+            this.onCheck(this.item.memoId,v)
+          })
+      }
       NodeContainer(this.memoItemNode).onClick(()=>{
         this.handleDetail(this.item)
       })
+        .layoutWeight(1)
     }
   }
 }

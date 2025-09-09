@@ -1,6 +1,7 @@
 import { MemoSimpleListItemModel } from "../model/Memo"
 import { IMemoRouteParam } from "../types"
 import MemoViewModel from '../viewmodel/MemoViewModel'
+import { CustomTitleBar } from "./CustomTitleBar"
 import { MemoItem } from './MemoItem'
 
 
@@ -10,6 +11,8 @@ struct ListItemSwipeEnd {
   @Param @Require item:MemoSimpleListItemModel
   @Param onPinTop:()=>void = ()=>{}
   @Param onDelete:()=>void = ()=>{}
+  // 是否开启多选模式
+  @Local isMultiple:boolean = false
   build(){
     Row({space: 10}){
       SymbolGlyph(
@@ -29,18 +32,103 @@ struct ListItemSwipeEnd {
 
   }
 }
+@Extend(ListItem)
+function listItemAttr(){
+  .margin({top:15})
+  .backgroundColor(Color.White)
+  .borderRadius(5)
+  .shadow(ShadowStyle.OUTER_DEFAULT_SM)
+  .border({
+    width:{
+      bottom: 1
+    },
+    color: '#dfdfdf'
+  })
+  .transition(TransitionEffect.SLIDE)
+}
+
 
 @ComponentV2
 export default struct MemoView {
+  private scroller:ListScroller = new ListScroller()
   @Consumer() list: MemoSimpleListItemModel[] = []
   @Consumer() pagePathStackInfos:NavPathStack = new NavPathStack()
-  scroller:ListScroller = new ListScroller()
+  @Local isMultiple:boolean = false
+  @Local checkedSet: Set<string> = new Set([])
+  @Computed
+  get checkedAll(){
+    return this.checkedSet.size==this.list.length
+  }
+  @Builder
+  contentCoverTitleBuilder(){
+    Text(this.checkedSet.size?`已选择${this.checkedSet.size}项`:'未选择')
+  }
+  @Builder
+  contentCoverBuilder(){
+    Column(){
+      CustomTitleBar({
+        onBackPress:()=>{
+          this.isMultiple = false
+        },
+        title:()=>{
+          this.contentCoverTitleBuilder()
+        }
+      })
+      List(){
+        ForEach(this.list,(item:MemoSimpleListItemModel)=>{
+          ListItem(){
+            MemoItem({
+              item:item,
+              checkable:this.isMultiple,
+              checked: this.checkedSet.has(item.memoId),
+              onCheck:(id:string,checked:boolean)=>{
+                if(checked){
+                  this.checkedSet.add(id)
+                }else {
+                  this.checkedSet.delete(id)
+                }
+              }
 
+            })
+          }
+          .listItemAttr()
+        },(item:MemoSimpleListItemModel)=>{
+          return item.memoId
+        })
+
+      }
+      .layoutWeight(1)
+      .backgroundColor(Color.Transparent)
+      Row(){
+        SymbolGlyph($r('sys.symbol.trash')).fontSize(30)
+        SymbolGlyph(
+          this.checkedAll? $r('sys.symbol.checkmark_square_on_square')
+          : $r('sys.symbol.checkmark_square_on_square_fill')
+        ).fontSize(30)
+          .onClick(()=>{
+            if(this.checkedAll){
+              this.checkedSet.clear()
+            }else {
+              let ids = this.list.map(item=>item.memoId)
+              this.checkedSet = new Set(ids)
+            }
+          })
+      }
+      .width('100%')
+      .justifyContent(FlexAlign.SpaceAround)
+    }
+    .padding(15)
+    .backgroundColor('#f3f3f3')
+    .height('100%')
+  }
   @Builder
   contextBuilder(id:string) {
     Menu() {
-      MenuItem({ startIcon: $r('sys.symbol.trash'), content: "删除" }).onClick(()=>{
+      MenuItem({ content: "删除" }).onClick(()=>{
         this.handleDelete(id)
+      })
+      MenuItem({ content: "多选" }).onClick(()=>{
+        this.isMultiple = true
       })
     }
   }
@@ -118,46 +206,47 @@ export default struct MemoView {
 
   build(){
     //
-    if(this.list.length){
+    Column(){
 
-      List({scroller:this.scroller}){
-        ForEach(this.list,(item:MemoSimpleListItemModel)=>{
-          ListItem(){
-            MemoItem({item:item,onDetail:(params:IMemoRouteParam)=>{
-               this.handleDetail(params)
-            }})
+      if(this.list.length){
 
-          }
-          .bindContextMenu(this.contextBuilder(item.memoId),ResponseType.LongPress,{
-            preview: MenuPreviewMode.IMAGE,
-            previewAnimationOptions: {scale: [0.8, 1.0]},
-          })
-          .margin({top:15})
-          .backgroundColor(Color.White)
-          .swipeAction({
-            end: this.endBuilder(item)
-          })
-          .borderRadius(5)
-          .shadow(ShadowStyle.OUTER_DEFAULT_SM)
-          .border({
-            width:{
-              bottom: 1
-            },
-            color: '#dfdfdf'
-          })
-          .transition(TransitionEffect.SLIDE)
+        List({scroller:this.scroller}){
+          ForEach(this.list,(item:MemoSimpleListItemModel)=>{
+            if(!this.isMultiple){
+
+              ListItem(){
+                MemoItem({
+                  item:item,
+                  onDetail:(params:IMemoRouteParam)=>{
+                   this.handleDetail(params)
+                  }
+                })
+
+              }
+              .bindContextMenu(this.contextBuilder(item.memoId),ResponseType.LongPress,{
+                preview: MenuPreviewMode.IMAGE,
+                previewAnimationOptions: {scale: [0.8, 1.0]},
+              })
+              .swipeAction({
+                end: this.endBuilder(item)
+              })
+              .listItemAttr()
+            }
 
 
-          },(item:MemoSimpleListItemModel,)=>`${item.memoId}`
-        )
+            },(item:MemoSimpleListItemModel)=>`${item.memoId}`
+          )
+        }
+        .height('100%')
+        .margin({left:15,right:15})
+        .backgroundColor(Color.Transparent)
+
+
+      }else {
+        Text('暂无数据')
       }
-      .height('100%')
-      .margin({left:15,right:15})
-      .backgroundColor(Color.Transparent)
-
-    }else {
-      Text('暂无数据')
     }
+    .bindContentCover($$this.isMultiple,this.contentCoverBuilder(),ModalTransition.NONE)
 
 
   }
