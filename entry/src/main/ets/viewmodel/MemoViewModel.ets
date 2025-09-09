@@ -37,8 +37,8 @@ class MemoViewModel {
   }
 
   // 删除备忘录
-  async deleteMemo(id: string): Promise<void> {
-    await MemoRepository.deleteMemo(id);
+  async deleteMemo(ids: string[]): Promise<void> {
+    await MemoRepository.deleteMemo(ids);
   }
 
   // 获取所有活动备忘录

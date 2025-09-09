@@ -60,15 +60,40 @@ class MemoDao {
   }
 
   // 删除备忘录
-  async delete(id: string): Promise<number> {
+  async delete(ids: string[]): Promise<number> {
+    if(ids.length==0){
+      return 0
+    }
     const store = await Database.getRdbStore();
-    const predicates = new relationalStore.RdbPredicates(TABLE_NAME);
-    predicates.equalTo('memo_id', id);
 
-    // 先获取内容引用以便清理
-    const memo = await this.getById(id);
+    try{
+      // 开始事务
+      await store.beginTransaction();
 
-     return await store.delete(predicates);
+      let totalDeleted = 0;
+      for (const id of ids) {
+        // 先清理资源
+        const memo = await this.getById(id);
+
+        // 执行删除
+        const predicates = new relationalStore.RdbPredicates(TABLE_NAME);
+        predicates.equalTo('memo_id', id);
+        const deleted = await store.delete(predicates);
+        totalDeleted += deleted;
+      }
+      // 提交事务
+      store.commit();
+
+      return totalDeleted;
+    }
+    catch (e) {
+      //
+      // 回滚事务
+      store.rollBack()
+      console.error('Batch delete failed:', e);
+      throw new Error('批量删除失败: ' + e.message);
+    }
+
 
   }
 

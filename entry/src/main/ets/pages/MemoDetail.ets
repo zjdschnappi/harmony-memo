@@ -60,7 +60,7 @@ struct MemoDetail {
 
     }).then((value)=>{
       if(value.index==1) {
-        MemoViewModel.deleteMemo(this.pageParams.id).then(()=>{
+        MemoViewModel.deleteMemo([this.pageParams.id]).then(()=>{
           this.pageInfos.pop()
 
           EventManager.emit(EventTypes.FETCH_MEMO_LIST)

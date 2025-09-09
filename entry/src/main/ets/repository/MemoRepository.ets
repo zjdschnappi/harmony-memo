@@ -81,8 +81,8 @@ class MemoRepository {
 
 
   // 删除备忘录
-  async deleteMemo(id: string): Promise<void> {
-    const count = await MemoDao.delete(id);
+  async deleteMemo(ids: string[]): Promise<void> {
+    const count = await MemoDao.delete(ids);
     if (count === 0) {
       throw new Error('删除失败，备忘录不存在');
     }

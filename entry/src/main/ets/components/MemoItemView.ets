@@ -34,7 +34,7 @@ export struct  MemoItemView {
         }.layoutWeight(1)
         Image(this.item.imgUrl?.[0]).objectFit(ImageFit.Contain).width(50).height(50)
       }
-      .padding(10)
+      .padding(15)
       .width('100%')
     }
 

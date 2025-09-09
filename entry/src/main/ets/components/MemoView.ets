@@ -100,7 +100,12 @@ export default struct MemoView {
       .layoutWeight(1)
       .backgroundColor(Color.Transparent)
       Row(){
-        SymbolGlyph($r('sys.symbol.trash')).fontSize(30)
+        SymbolGlyph($r('sys.symbol.trash'))
+          .fontSize(30)
+          .enabled(!!this.checkedSet.size)
+          .onClick(()=>{
+            this.handleBatchDelete()
+          })
         SymbolGlyph(
           this.checkedAll? $r('sys.symbol.checkmark_square_on_square')
           : $r('sys.symbol.checkmark_square_on_square_fill')
@@ -122,10 +127,10 @@ export default struct MemoView {
     .height('100%')
   }
   @Builder
-  contextBuilder(id:string) {
+  contextBuilder() {
     Menu() {
       MenuItem({ content: "删除" }).onClick(()=>{
-        this.handleDelete(id)
+        this.handleBatchDelete()
       })
       MenuItem({ content: "多选" }).onClick(()=>{
         this.isMultiple = true
@@ -145,6 +150,7 @@ export default struct MemoView {
       }
     })
   }
+
   handlePinTop(id:string){
     MemoViewModel.togglePin(id)
     this.scroller.closeAllSwipeActions()
@@ -175,6 +181,27 @@ export default struct MemoView {
     })
 
   }
+  handleBatchDelete(){
+    let ids = Array.from(this.checkedSet);
+
+    this.getUIContext().getPromptAction().showDialog({
+      title: '提示',
+      message: `确认删除${ids.length==1?'这条':`这${ids.length}条`}记录吗？`,
+      buttons:[
+        {text:'取消',primary:false,color:'black'},
+        {text:'确定',primary:true,color:'red'}
+      ],
+
+    }).then((value)=>{
+      if(value.index==1){
+        MemoViewModel.deleteMemo(ids).then(()=>{
+          this.list = this.list.filter(item=>!ids.find(id=>id==item.memoId))
+          this.isMultiple = false
+        })
+      }
+    })
+
+  }
   handleDelete(id:string){
     this.getUIContext().getPromptAction().showDialog({
       title: '提示',
@@ -187,7 +214,7 @@ export default struct MemoView {
     }).then((value)=>{
       if(value.index==1){
         //
-        MemoViewModel.deleteMemo(id)
+        MemoViewModel.deleteMemo([id])
         let index = this.list.findIndex(item=>item.memoId==id)
         if(index>-1){
           this.getUIContext().animateTo({duration:300},()=>{
@@ -223,7 +250,7 @@ export default struct MemoView {
                 })
 
               }
-              .bindContextMenu(this.contextBuilder(item.memoId),ResponseType.LongPress,{
+              .bindContextMenu(this.contextBuilder(),ResponseType.LongPress,{
                 preview: MenuPreviewMode.IMAGE,
                 previewAnimationOptions: {scale: [0.8, 1.0]},
               })
