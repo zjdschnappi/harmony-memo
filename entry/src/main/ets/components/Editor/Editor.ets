@@ -26,10 +26,10 @@ export struct Editor {
 
           //
         })
-        // .aboutToIMEInput((v)=>{
-        //   EventManager.emit(EventTypes.EDITOR_ABOUT_TO_INPUT,{data:v})
-        //   return false
-        // })
+        .aboutToIMEInput((v)=>{
+          EventManager.emit(EventTypes.EDITOR_ABOUT_TO_INPUT,{data:v})
+          return false
+        })
         .layoutWeight(1)
         .onSelectionChange(v=>{
 

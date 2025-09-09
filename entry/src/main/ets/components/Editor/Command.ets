@@ -40,3 +40,71 @@ export class InsertTextCommand extends EditorCommand {
   }
 
 }
+
+interface SpanTextStyle{
+  start?:number,
+  end?:number,
+  style:RichEditorTextStyle
+}
+
+export class FormatTextCommand extends EditorCommand{
+  private startOffset:number=0
+  private endOffset:number=0
+  private prevTextStyles:SpanTextStyle[] = []
+  private prevStyle:RichEditorTextStyle={};
+  private curStyle:RichEditorTextStyle={}
+  private undoCallback?:()=>void = ()=>{}
+  constructor(start:number=0,end:number=0,style:RichEditorTextStyle,undoCallback:()=>void = ()=>{}) {
+    super();
+    this.startOffset = start;
+    this.endOffset = end;
+    this.undoCallback = this.undoCallback
+    this.curStyle = style
+  }
+  execute(controller: RichEditorController){
+    if(this.startOffset<this.endOffset){
+      let spans = controller.getSpans()
+      spans.forEach((item)=> {
+        let span = item as RichEditorImageSpanResult
+        if (typeof span.imageStyle !== 'undefined') {
+          //
+        } else {
+          let span = item as RichEditorTextSpanResult;
+
+          this.prevTextStyles.push({
+            start: span.spanPosition.spanRange?.[0],
+            end:span.spanPosition.spanRange?.[1],
+            style: span.textStyle
+          })
+        }
+      })
+
+      controller.updateSpanStyle({
+        start:this.startOffset,
+        end:this.endOffset,
+        textStyle:this.curStyle
+      })
+    }else {
+      this.prevStyle = controller.getTypingStyle()
+      controller.setTypingStyle(this.curStyle)
+    }
+
+
+  }
+  undo(controller: RichEditorController) {
+
+    if(this.prevTextStyles.length){
+      this.prevTextStyles?.forEach((item)=>{
+
+        controller.updateSpanStyle({
+          start: item.start,
+          end: item.end,
+          textStyle: item.style
+        })
+      })
+
+    }else {
+      controller.setTypingStyle(this.prevStyle)
+    }
+  }
+}

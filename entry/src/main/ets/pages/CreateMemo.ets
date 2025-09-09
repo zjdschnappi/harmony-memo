@@ -4,6 +4,7 @@ import { IMemoRouteParam,  } from "../types";
 import { MemoDetailView } from "../components/MemoDetailView";
 import { CustomTitleBar } from "../components/CustomTitleBar";
 import EventManager ,{EventTypes} from '../utils/EventManager'
+import { EditorHistoryManager } from "../components/Editor/HistoryManager";
 
 @Builder
 export function CreateMemoBuilder(){
@@ -27,6 +28,7 @@ struct CreateMemo {
   private pageInfos:NavPathStack = new NavPathStack()
   private editorOptions: RichEditorOptions = { controller: new RichEditorController() };
   private pageParams:IMemoRouteParam ={id:'-1'}
+  @Provider() historyManager: EditorHistoryManager = new EditorHistoryManager(this.editorOptions.controller)
   @Local memoTitle:string = '标题'
 
   @Builder
@@ -34,10 +36,18 @@ struct CreateMemo {
     Row({space: 10}){
       Text(){
         SymbolSpan($r('sys.symbol.undo'))
-      }.IconText(false)
+      }
+      .IconText(this.historyManager.canUndo)
+      .onClick(()=>{
+        this.historyManager.undo()
+      })
       Text(){
         SymbolSpan($r('sys.symbol.redo'))
-      }.IconText(false)
+      }
+      .IconText(this.historyManager.canRedo)
+      .onClick(()=>{
+        this.historyManager.redo()
+      })
       Text(){
         SymbolSpan($r('sys.symbol.checkmark'))
       }.IconText(true).onClick(()=>{

@@ -1,7 +1,8 @@
 import { EditorCommand } from './Command'
+@ObservedV2
 export class EditorHistoryManager {
-  private undoStack: EditorCommand[] = [];
-  private redoStack: EditorCommand[] = [];
+  @Trace private undoStack: EditorCommand[] = [];
+  @Trace private redoStack: EditorCommand[] = [];
   private maxHistorySize: number = 100;
   private controller: RichEditorController;
 
@@ -10,7 +11,7 @@ export class EditorHistoryManager {
   }
 
   // 执行新命令
-  async executeCommand(command: EditorCommand): Promise<void> {
+  executeCommand(command: EditorCommand) {
     command.execute(this.controller);
 
 
@@ -24,7 +25,7 @@ export class EditorHistoryManager {
     this.trimHistory();
   }
 
-  async undo(): Promise<void> {
+  undo(){
     if (this.undoStack.length === 0) return;
 
     const command = this.undoStack.pop()!;
@@ -32,7 +33,7 @@ export class EditorHistoryManager {
     this.redoStack.push(command);
   }
 
-  async redo(): Promise<void> {
+  redo(){
     if (this.redoStack.length === 0) return;
 
     const command = this.redoStack.pop()!;
@@ -45,12 +46,12 @@ export class EditorHistoryManager {
       this.undoStack.shift();
     }
   }
-
-  canUndo(): boolean {
+  @Computed
+  get canUndo(): boolean {
     return this.undoStack.length > 0;
   }
-
-  canRedo(): boolean {
+  @Computed
+  get canRedo(): boolean {
     return this.redoStack.length > 0;
   }
 

@@ -2,6 +2,8 @@ import { IColorItemParams, ITextColorItem, ITextDecoratorItem,
   ITextDirectionItem,
   ITypingStyleParam } from "../../types";
 import EventManager ,{ EventTypes } from "../../utils/EventManager";
+import { InsertTextCommand } from "./Command";
+import { EditorHistoryManager } from "./HistoryManager";
 
 const defaultColor = '#E5000000'
 
@@ -24,6 +26,7 @@ export struct TextFormatToolView {
   @Local paragraphStyle:ParagraphStyle = new ParagraphStyle()
   @Local selectionRange: RichEditorRange = {start:0,end:0}
   @Param controller: RichEditorController = new RichEditorController()
+  @Consumer() historyManager:EditorHistoryManager = new EditorHistoryManager(this.controller)
 
 
 
@@ -31,6 +34,13 @@ export struct TextFormatToolView {
     EventManager.on(EventTypes.EDITOR_SELECTION_CHANGE,(e)=>{
       this.selectionRange = e.data?.data as RichEditorRange
       this.setSelectionRangeState(e.data?.data as RichEditorRange)
+    })
+    EventManager.on(EventTypes.EDITOR_ABOUT_TO_INPUT,(e)=>{
+      let value = e.data?.data as RichEditorInsertValue
+      let command = new InsertTextCommand(value.insertValue,{
+        style: this.getTypingStyles({})
+      })
+      this.historyManager.executeCommand(command)
     })
   }
   @Builder
