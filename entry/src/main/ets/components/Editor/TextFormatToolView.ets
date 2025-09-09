@@ -5,6 +5,14 @@ import EventManager ,{ EventTypes } from "../../utils/EventManager";
 
 const defaultColor = '#E5000000'
 
+@ObservedV2
+class ParagraphStyle implements RichEditorParagraphStyle {
+  @Trace textAlign?: TextAlign = TextAlign.Start;
+  @Trace leadingMargin?: Dimension | LeadingMarginPlaceholder;
+  @Trace wordBreak?: WordBreak;
+  @Trace lineBreakStrategy?: LineBreakStrategy;
+}
+
 @ComponentV2
 export struct TextFormatToolView {
   @Local showTextToolBar:boolean = false
@@ -13,7 +21,7 @@ export struct TextFormatToolView {
   @Local isItalic:boolean = false
   @Local isUnderline:boolean = false
   @Local textColor:Color|string = defaultColor
-  @Local paragraphStyle:TextAlign = TextAlign.Start
+  @Local paragraphStyle:ParagraphStyle = new ParagraphStyle()
   @Local selectionRange: RichEditorRange = {start:0,end:0}
   @Param controller: RichEditorController = new RichEditorController()
 
@@ -51,16 +59,19 @@ export struct TextFormatToolView {
               let styles:ITypingStyleParam = {}
               switch (item.type){
                 case 'underline':{
+                  styles.isUnderline = !this.isUnderline
                   this.isUnderline=!this.isUnderline
-                  styles = {isUnderline:this.isUnderline}
+                  break
                 }
                 case 'italic':{
+                  styles.isItalic = !this.isItalic
                   this.isItalic = !this.isItalic
-                  styles = {isItalic:this.isItalic}
+                  break
                 }
                 case 'bold':{
+                  styles.isBold = !this.isBold
                   this.isBold = !this.isBold
-                  styles = {isBold:this.isBold}
+                  break
                 }
 
               }
@@ -74,6 +85,15 @@ export struct TextFormatToolView {
                 this.controller.setTypingStyle(this.getTypingStyles(styles))
               }
 
+            } else {
+              if(item.type=='textAlignStart'){
+                this.paragraphStyle.textAlign = TextAlign.Start
+              }else if(item.type=='textAlignCenter'){
+                this.paragraphStyle.textAlign = TextAlign.Center
+              }else if(item.type=='textAlignEnd'){
+                this.paragraphStyle.textAlign = TextAlign.End
+              }
+              this.controller.updateParagraphStyle({style: this.paragraphStyle})
             }
           })
 
@@ -171,35 +191,21 @@ export struct TextFormatToolView {
       },
       {
         icon: $r('sys.symbol.text_alignleft'),
-        type: 'textAlignLeft',
-        active: this.paragraphStyle == TextAlign.Start
+        type: 'textAlignStart',
+        active: this.paragraphStyle.textAlign == TextAlign.Start
       },
       {
         icon: $r('sys.symbol.text_aligncenter'),
-        // onClick:()=>{
-        //   this.paragraphStyle = TextAlign.Center
-        //   this.controller.updateParagraphStyle({
-        //     style: {
-        //       textAlign: TextAlign.Center
-        //     }
-        //   })
-        // },
+
         type: 'textAlignCenter',
-        active: this.paragraphStyle == TextAlign.Center
+        active: this.paragraphStyle.textAlign == TextAlign.Center
       },
 
       {
         icon: $r('sys.symbol.text_alignright'),
-        // onClick:()=>{
-        //   this.paragraphStyle = TextAlign.End
-        //   this.controller.updateParagraphStyle({
-        //     style: {
-        //       textAlign: TextAlign.End
-        //     }
-        //   })
-        // },
-        type: 'textAlignRight',
-        active: this.paragraphStyle == TextAlign.End
+
+        type: 'textAlignEnd',
+        active: this.paragraphStyle.textAlign == TextAlign.End
       },
     ]
     return list
@@ -324,7 +330,7 @@ export struct TextFormatToolView {
         this.isUnderline =( textDecorateStyleSet.values().next().value as TextDecorationType) ==  TextDecorationType.Underline
       }
       if(paragraphTypeSet.size==1){
-        this.paragraphStyle =( paragraphTypeSet.values().next().value as TextAlign)
+        this.paragraphStyle.textAlign =( paragraphTypeSet.values().next().value as TextAlign)
       }
 
     })

@@ -21,7 +21,7 @@ export interface IColorItemParams {
 
 export interface ITextDecoratorItem{
   icon: Resource;
-  type: 'underline'|'italic'|'bold'|'textAlignLeft'|'textAlignCenter'|'textAlignRight';
+  type: 'underline'|'italic'|'bold'|'textAlignStart'|'textAlignCenter'|'textAlignEnd';
   active?:boolean;
 }
 export interface ITextDirectionItem{
