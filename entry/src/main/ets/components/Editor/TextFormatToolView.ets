@@ -2,7 +2,7 @@ import { IColorItemParams, ITextColorItem, ITextDecoratorItem,
   ITextDirectionItem,
   ITypingStyleParam } from "../../types";
 import EventManager ,{ EventTypes } from "../../utils/EventManager";
-import { InsertTextCommand } from "./Command";
+import { FormatTextCommand, InsertTextCommand } from "./Command";
 import { EditorHistoryManager } from "./HistoryManager";
 
 const defaultColor = '#E5000000'
@@ -85,15 +85,21 @@ export struct TextFormatToolView {
                 }
 
               }
-              if(this.checkIsSelectRange()){
-                this.controller.updateSpanStyle({
-                  start: this.selectionRange.start,
-                  end: this.selectionRange.end,
-                  textStyle: this.getTypingStyles(styles)
-                })
-              }else {
-                this.controller.setTypingStyle(this.getTypingStyles(styles))
-              }
+
+              let command = new FormatTextCommand(this.selectionRange.start,this.selectionRange.end,this.getTypingStyles(styles),()=>{
+                // todo 回退未选择范围时的预设样式
+              })
+
+              this.historyManager.executeCommand(command)
+              // if(this.checkIsSelectRange()){
+              //   this.controller.updateSpanStyle({
+              //     start: this.selectionRange.start,
+              //     end: this.selectionRange.end,
+              //     textStyle: this.getTypingStyles(styles)
+              //   })
+              // }else {
+              //   this.controller.setTypingStyle(this.getTypingStyles(styles))
+              // }
 
             } else {
               if(item.type=='textAlignStart'){
@@ -132,16 +138,21 @@ export struct TextFormatToolView {
         ForEach(this.colorItems(),(item:ITextColorItem)=>{
           this.colorItem({color:item.color,onClick:(item:Color|string)=>{
             this.textColor = item
-            if(this.checkIsSelectRange()){
-              this.controller.updateSpanStyle({
-                start: this.selectionRange.start,
-                end: this.selectionRange.end,
-                textStyle:this.getTypingStyles({textColor:item})
-              })
-            }else {
-              this.controller.setTypingStyle(this.getTypingStyles({textColor:item}))
 
-            }
+            let command = new FormatTextCommand(this.selectionRange.start,this.selectionRange.end,this.getTypingStyles({textColor:item}),()=>{
+              //
+            })
+            this.historyManager.executeCommand(command)
+            // if(this.checkIsSelectRange()){
+            //   this.controller.updateSpanStyle({
+            //     start: this.selectionRange.start,
+            //     end: this.selectionRange.end,
+            //     textStyle:this.getTypingStyles({textColor:item})
+            //   })
+            // }else {
+            //   this.controller.setTypingStyle(this.getTypingStyles({textColor:item}))
+            //
+            // }
 
           }
 
@@ -159,15 +170,20 @@ export struct TextFormatToolView {
         })
           .onChange((v)=>{
             this.fontSize = v
-            if(this.checkIsSelectRange()){
-              this.controller.updateSpanStyle({
-                start: this.selectionRange.start,
-                end: this.selectionRange.end,
-                textStyle:this.getTypingStyles({fontSize:v})
-              })
-            } else {
-              this.controller.setTypingStyle(this.getTypingStyles({fontSize:v}))
-            }
+
+            let command = new FormatTextCommand(this.selectionRange.start,this.selectionRange.end,this.getTypingStyles({fontSize:v}),()=>{
+              //
+            })
+            this.historyManager.executeCommand(command)
+            // if(this.checkIsSelectRange()){
+            //   this.controller.updateSpanStyle({
+            //     start: this.selectionRange.start,
+            //     end: this.selectionRange.end,
+            //     textStyle:this.getTypingStyles({fontSize:v})
+            //   })
+            // } else {
+            //   this.controller.setTypingStyle(this.getTypingStyles({fontSize:v}))
+            // }
 
           })
           .layoutWeight(1)
