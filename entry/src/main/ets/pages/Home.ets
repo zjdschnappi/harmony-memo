@@ -186,16 +186,7 @@ struct Home {
                   }
                 }
               ])
-            Row(){
-              SymbolGlyph($r('sys.symbol.plus_circle'))
-                .fontSize(30)
-                .onClick(()=>{
-                  const params:IMemoRouteParam= {id:'-1'}
-                  this.pagePathStackInfos.pushPathByName('CreateMemo',params)
-                })
-            }.width('100%')
-            .justifyContent(FlexAlign.Center)
-            .position({bottom:20,left:0,right:0})
+
           }.height('100%').width('100%').backgroundColor('#f3f3f3')
 
         }
