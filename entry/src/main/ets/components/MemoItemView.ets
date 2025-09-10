@@ -15,14 +15,6 @@ export struct  MemoItemView {
     }else {
 
       Row(){
-
-        if(this.item.isPinned){
-          Text('置顶')
-            .backgroundColor(Color.Green)
-            .padding({left:5,right:5})
-            .position({left:-15,top:-15})
-            .fontColor(Color.White).fontSize(12)
-        }
         Column({space: 10}){
 
           Text(this.item.title).fontSize(18).fontWeight(700).width('100%')

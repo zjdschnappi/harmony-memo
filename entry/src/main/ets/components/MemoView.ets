@@ -32,20 +32,7 @@ struct ListItemSwipeEnd {
 
   }
 }
-@Extend(ListItem)
-function listItemAttr(){
-  .margin({top:15})
-  .backgroundColor(Color.White)
-  .borderRadius(5)
-  .shadow(ShadowStyle.OUTER_DEFAULT_SM)
-  .border({
-    width:{
-      bottom: 1
-    },
-    color: '#dfdfdf'
-  })
-  .transition(TransitionEffect.SLIDE)
-}
+
 
 
 @ComponentV2
@@ -55,6 +42,13 @@ export default struct MemoView {
   @Consumer() pagePathStackInfos:NavPathStack = new NavPathStack()
   @Local isMultiple:boolean = false
   @Local checkedSet: Set<string> = new Set([])
+
+  @Monitor('isMultiple')
+  modeChange(){
+    if(!this.isMultiple){
+      this.checkedSet.clear()
+    }
+  }
   @Computed
   get checkedAll(){
     return this.checkedSet.size==this.list.length
@@ -74,7 +68,12 @@ export default struct MemoView {
           this.contentCoverTitleBuilder()
         }
       })
-      List(){
+        .padding({
+          left: 15,
+          right: 15,
+          top: 15
+        })
+      List({space: 15}){
         ForEach(this.list,(item:MemoSimpleListItemModel)=>{
           ListItem(){
             MemoItem({
@@ -91,12 +90,13 @@ export default struct MemoView {
 
             })
           }
-          .listItemAttr()
+          .transition(TransitionEffect.SLIDE)
         },(item:MemoSimpleListItemModel)=>{
           return item.memoId
         })
 
       }
+      .alignListItem(ListItemAlign.Center)
       .layoutWeight(1)
       .backgroundColor(Color.Transparent)
       Row(){
@@ -122,15 +122,15 @@ export default struct MemoView {
       .width('100%')
       .justifyContent(FlexAlign.SpaceAround)
     }
-    .padding(15)
+    .padding({bottom: 15})
     .backgroundColor('#f3f3f3')
     .height('100%')
   }
   @Builder
-  contextBuilder() {
+  contextBuilder(id:string) {
     Menu() {
       MenuItem({ content: "删除" }).onClick(()=>{
-        this.handleBatchDelete()
+        this.handleDelete(id)
       })
       MenuItem({ content: "多选" }).onClick(()=>{
         this.isMultiple = true
@@ -237,7 +237,7 @@ export default struct MemoView {
 
       if(this.list.length){
 
-        List({scroller:this.scroller}){
+        List({scroller:this.scroller,space: 15}){
           ForEach(this.list,(item:MemoSimpleListItemModel)=>{
             if(!this.isMultiple){
 
@@ -250,22 +250,24 @@ export default struct MemoView {
                 })
 
               }
-              .bindContextMenu(this.contextBuilder(),ResponseType.LongPress,{
+              .bindContextMenu(this.contextBuilder(item.memoId),ResponseType.LongPress,{
                 preview: MenuPreviewMode.IMAGE,
                 previewAnimationOptions: {scale: [0.8, 1.0]},
               })
               .swipeAction({
                 end: this.endBuilder(item)
               })
-              .listItemAttr()
+              .transition(TransitionEffect.SLIDE)
+
             }
 
 
             },(item:MemoSimpleListItemModel)=>`${item.memoId}`
           )
         }
+        .margin({top: 15})
         .height('100%')
-        .margin({left:15,right:15})
+        .alignListItem(ListItemAlign.Center)
         .backgroundColor(Color.Transparent)
 
 

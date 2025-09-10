@@ -59,10 +59,23 @@ export struct MemoItem {
             this.onCheck(this.item.memoId,v)
           })
       }
+      if(this.item.isPinned){
+        Text('置顶')
+          .borderRadius({
+            topLeft: 15
+          })
+          .backgroundColor(Color.Green)
+          .padding({left:5,right:5})
+          .position({left:0,top:0})
+          .fontColor(Color.White).fontSize(12)
+      }
       NodeContainer(this.memoItemNode).onClick(()=>{
         this.handleDetail(this.item)
       })
         .layoutWeight(1)
     }
+    .borderRadius(15)
+    .width('90%')
+    .backgroundColor(Color.White)
   }
 }
