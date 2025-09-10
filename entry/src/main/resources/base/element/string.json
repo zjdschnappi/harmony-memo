@@ -15,6 +15,14 @@
     {
       "name": "system_share",
       "value": "系统分享"
+    },
+    {
+      "name": "cancel",
+      "value": "取消"
+    },
+    {
+      "name": "confirm",
+      "value": "确定"
     }
   ]
 }

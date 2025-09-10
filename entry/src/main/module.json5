@@ -13,6 +13,11 @@
     "installationFree": false,
     "pages": "$profile:main_pages",
     "routerMap": "$profile:route_map",
+    "requestPermissions": [
+      {
+        "name": "ohos.permission.VIBRATE"
+      }
+    ],
     "abilities": [
       {
         "name": "EntryAbility",
