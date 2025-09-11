@@ -3,18 +3,27 @@ import { formatDate } from "../utils/DateUtil"
 import { TodoCreate } from "./TodoCreate"
 import { endBuilder, TodoItem } from "./TodoItem"
 
+let id = 0
 @ComponentV2
 export default struct TodoView {
   @Local list: TodoItemSimpleModel[] = [
-    new TodoItemSimpleModel('1','待办1',formatDate(new Date()),formatDate(new Date()),false)
+
   ]
   @Local sheetOpen:boolean = false
 
   @Builder
   sheetContentBuilder(){
     Column(){
-      TodoCreate()
+      TodoCreate({
+        onSubmit: this.handleSubmit
+      })
     }
+  }
+  handleSubmit=(title:string,time:string|null,memo?:string)=>{
+    this.list.push(
+      new TodoItemSimpleModel(String(id++),title,formatDate(new Date()),formatDate(new Date()),false,time,undefined,memo)
+    )
+    this.sheetOpen = false
   }
   build(){
     //
@@ -35,6 +44,7 @@ export default struct TodoView {
             return item.id
           })
         }
+        .height('100%')
         .margin({top: 15})
         .alignListItem(ListItemAlign.Center)
       }else {
@@ -60,6 +70,7 @@ export default struct TodoView {
       }
 
     })
+    .justifyContent(FlexAlign.Center)
     .width('100%')
     .height('100%')
 

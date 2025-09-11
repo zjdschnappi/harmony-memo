@@ -7,15 +7,19 @@ export struct TodoItem {
   build() {
     Row(){
       Checkbox()
-        .select(this.info.isCompleted)
+        .select($$this.info.isCompleted)
         .onChange((v)=>{
           this.onCheck(v)
         })
+      Column(){
+        Text(this.info.title)
+          .fontColor(this.info.isCompleted ? Color.Gray : Color.Black)
+          .decoration({ type: this.info.isCompleted ? TextDecorationType.LineThrough : TextDecorationType.None })
+        Text(this.info.dueTime).fontSize(12)
+      }
+      .alignItems(HorizontalAlign.Start)
+      .margin({ left: 15 })
 
-      Text(this.info.title)
-        .fontColor(this.info.isCompleted ? Color.Gray : Color.Black)
-        .decoration({ type: this.info.isCompleted ? TextDecorationType.LineThrough : TextDecorationType.None })
-        .margin({ left: 15 })
     }
     .padding(15)
     .backgroundColor(Color.White)

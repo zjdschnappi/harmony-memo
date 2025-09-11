@@ -13,14 +13,14 @@ export class LocationModel {
 @ObservedV2
 export class TodoItemSimpleModel {
   id:string;
-  title:string;
-  createdTime:string;
-  modifiedTime:string;
-  isCompleted:boolean;
-  dueTime?:string;
-  location?:LocationModel;
-  memo?:string
-  constructor(id:string,title:string,createdTime:string,modifiedTime:string,isCompleted:boolean,dueTime?:string,location?:LocationModel,memo?:string) {
+  @Trace title:string;
+  @Trace createdTime:string;
+  @Trace modifiedTime:string;
+  @Trace isCompleted:boolean;
+  @Trace dueTime?:string|null;
+  @Trace location?:LocationModel;
+  @Trace memo?:string
+  constructor(id:string,title:string,createdTime:string,modifiedTime:string,isCompleted:boolean,dueTime?:string|null,location?:LocationModel,memo?:string) {
     this.id = id;
     this.title = title;
     this.createdTime = createdTime;

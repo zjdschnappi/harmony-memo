@@ -23,6 +23,10 @@
     {
       "name": "confirm",
       "value": "确定"
+    },
+    {
+      "name": "submit",
+      "value": "提交"
     }
   ]
 }

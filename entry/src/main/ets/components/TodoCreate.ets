@@ -15,6 +15,7 @@ export struct TodoCreate {
   @Local title:string='';
   @Local memo:string='';
   @Local time:string|null = null;
+  @Param onSubmit:(title:string,time:string|null,memo?:string)=>void=()=>{}
 
   private openDateTimePicker = ( onConfirm: (selectedDate: Date) => void) => {
     dateTimePickerDialog(this.getUIContext(), {
@@ -42,13 +43,16 @@ export struct TodoCreate {
       offset: ({ dx: 0, dy: -4 }),
     });
   }
+  handleSubmit(){
+    this.onSubmit(this.title,this.time,this.memo)
+  }
   build() {
 
     Column({space: 15}){
 
       Row(){
         Text('待办事项')
-        TextInput({text: this.title,placeholder:'请输入待办事项'}).layoutWeight(1).backgroundColor(Color.Transparent)
+        TextInput({text: $$this.title,placeholder:'请输入待办事项'}).layoutWeight(1).backgroundColor(Color.Transparent)
       }.rowAttr()
 
       Row(){
@@ -80,9 +84,12 @@ export struct TodoCreate {
 
       Row(){
         Text('备注')
-        TextInput({text: this.memo,placeholder:'请输入备注',}).layoutWeight(1).backgroundColor(Color.Transparent)
+        TextInput({text: $$this.memo,placeholder:'请输入备注',}).layoutWeight(1).backgroundColor(Color.Transparent)
       }.rowAttr()
 
+      Button($r('app.string.confirm')).width('90%').backgroundColor(Color.Blue).onClick(()=>{
+        this.handleSubmit()
+      })
 
     }
     .margin({top: 15})

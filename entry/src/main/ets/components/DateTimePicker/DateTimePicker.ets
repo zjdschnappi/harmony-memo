@@ -68,7 +68,6 @@ function customPicker(picker: PickerClass) {
     .visibility(isVisibility(picker.dateIndex, picker.option?.timeFormat))
     .onChange((value: string | string[], index: number | number[]) => {
       picker.callback(picker.dateIndex, value, index)
-      vibrate()
     })
 }
 
@@ -170,6 +169,8 @@ export struct DateTimePicker {
       default:
         break;
     }
+    vibrate()
+    //
   }
 
   updateDateTime() {
