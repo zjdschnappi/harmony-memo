@@ -2,6 +2,9 @@
 import { AnimateCallback, CustomTransition } from '../customTransition/CustomNavigationUtils';
 import {DebugDB} from '@hadss/debug-db';
 import { common } from '@kit.AbilityKit';
+import { BusinessError } from '@kit.BasicServicesKit';
+import { calendarMgr } from '../entryability/EntryAbility';
+import { calendarManager } from '@kit.CalendarKit';
 
 const TAG: string = 'Index';
 
@@ -9,13 +12,51 @@ const TAG: string = 'Index';
 @ComponentV2
 struct Index {
   @Provider() pagePathStackInfos: NavPathStack = new NavPathStack();
+  @Provider() calendar?:calendarManager.Calendar
   // 允许进行自定义转场的页面名称
   private allowedCustomTransitionFromPageName: string[] = ['Home'];
   private allowedCustomTransitionToPageName: string[] = ['MemoDetail'];
 
+
+  initCalendar(){
+
+
+    let calendar: calendarManager.Calendar | undefined = undefined;
+    // 指定日历账户信息
+    const calendarAccount: calendarManager.CalendarAccount = {
+      // 日历账户名称
+      name: '我的备忘录',
+      // 日历账户类型
+      type: calendarManager.CalendarType.LOCAL,
+      // 日历账户显示名称，该字段如果不填，创建的日历账户在界面显示为空字符串。
+      displayName: '我的备忘录'
+    };
+    // 日历配置信息
+    const config: calendarManager.CalendarConfig = {
+      // 打开日程提醒
+      enableReminder: true,
+      // 设置日历账户颜色
+      color: '#aabbcc'
+    };
+    // 创建日历账户
+    calendarMgr?.createCalendar(calendarAccount).then((data: calendarManager.Calendar) => {
+      console.info(`Succeeded in creating calendar data->${JSON.stringify(data)}`);
+      this.calendar = data;
+      // 请确保日历账户创建成功后，再进行后续相关操作
+      data.setConfig(config).then(() => {
+        console.info(`Succeeded in setting config, data->${JSON.stringify(config)}`);
+      }).catch((err: BusinessError) => {
+        console.error(`Failed to set config. Code: ${err.code}, message: ${err.message}`);
+      });
+    }).catch((error: BusinessError) => {
+      console.error(`Failed to create calendar. Code: ${error.code}, message: ${error.message}`);
+    });
+
+  }
   aboutToAppear(): void {
     this.pagePathStackInfos.pushPath({ name: 'Home' },false);
     DebugDB.initialize(getContext(this) as common.UIAbilityContext)
+    this.initCalendar()
   }
 
   private isCustomTransitionEnabled(fromName: string, toName: string): boolean {

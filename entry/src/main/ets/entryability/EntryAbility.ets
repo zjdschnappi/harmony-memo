@@ -1,4 +1,6 @@
-import { AbilityConstant, ConfigurationConstant, UIAbility, Want } from '@kit.AbilityKit';
+import { AbilityConstant, ConfigurationConstant, UIAbility, Want,common, PermissionRequestResult, Permissions,abilityAccessCtrl } from '@kit.AbilityKit';
+import { BusinessError } from '@kit.BasicServicesKit';
+import { calendarManager } from '@kit.CalendarKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { display, window } from '@kit.ArkUI';
 import { WindowUtils } from '../utils/WindowUtils';
@@ -6,6 +8,11 @@ import Database from '../database/Database';
 import EventManager, { EventTypes } from '../utils/EventManager'
 
 const DOMAIN = 0x0000;
+
+
+export let calendarMgr: calendarManager.CalendarManager | null = null;
+
+export let mContext: common.UIAbilityContext | null = null;
 
 export default class EntryAbility extends UIAbility {
    private currentBreakPoint: string = '';
@@ -75,6 +82,17 @@ export default class EntryAbility extends UIAbility {
         }
         hilog.info(DOMAIN, 'testTag', 'Succeeded in loading the content.');
       });
+
+      mContext = this.context;
+      const permissions: Permissions[] = ['ohos.permission.READ_CALENDAR', 'ohos.permission.WRITE_CALENDAR'];
+      let atManager = abilityAccessCtrl.createAtManager();
+      atManager.requestPermissionsFromUser(mContext, permissions).then((result: PermissionRequestResult) => {
+        console.info(`get Permission success, result: ${JSON.stringify(result)}`);
+        calendarMgr = calendarManager.getCalendarManager(mContext);
+      }).catch((error: BusinessError) => {
+        console.error(`get Permission error, error. Code: ${error.code}, message: ${error.message}`);
+      })
+
     }catch (e){
 
     }

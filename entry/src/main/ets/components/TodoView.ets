@@ -19,11 +19,17 @@ export default struct TodoView {
       })
     }
   }
-  handleSubmit=(title:string,time:string|null,memo?:string)=>{
-    this.list.push(
-      new TodoItemSimpleModel(String(id++),title,formatDate(new Date()),formatDate(new Date()),false,time,undefined,memo)
-    )
-    this.sheetOpen = false
+  handleSubmit= async (title:string,time:string|null,memo?:string)=>{
+    let p = new Promise<string>((resolve,reject)=>{
+      let newId = String(id++)
+      this.list.push(
+        new TodoItemSimpleModel(newId,title,formatDate(new Date()),formatDate(new Date()),false,time,undefined,memo)
+      )
+      this.sheetOpen = false
+      resolve(newId)
+    })
+    return p
+
   }
   build(){
     //

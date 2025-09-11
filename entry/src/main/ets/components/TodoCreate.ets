@@ -1,6 +1,8 @@
 import { formatDate } from "../utils/DateUtil";
 import { dateTimePickerDialog } from "./DateTimePicker/DateTimePickerDialog";
 import { DateTimePickerParam, TimeFormat } from "./DateTimePicker/DateTimePickerInterface";
+import { calendarManager } from "@kit.CalendarKit";
+import { BusinessError } from '@kit.BasicServicesKit';
 
 @Extend(Row)
 function rowAttr(){
@@ -12,10 +14,13 @@ function rowAttr(){
 
 @ComponentV2
 export struct TodoCreate {
+  @Consumer() calendar?:calendarManager.Calendar
   @Local title:string='';
   @Local memo:string='';
-  @Local time:string|null = null;
-  @Param onSubmit:(title:string,time:string|null,memo?:string)=>void=()=>{}
+  @Local time:Date|null = null;
+  @Param @Require onSubmit:(title:string,time:string|null,memo?:string)=>Promise<string>
+
+  private textController:TextInputController = new TextInputController()
 
   private openDateTimePicker = ( onConfirm: (selectedDate: Date) => void) => {
     dateTimePickerDialog(this.getUIContext(), {
@@ -43,8 +48,38 @@ export struct TodoCreate {
       offset: ({ dx: 0, dy: -4 }),
     });
   }
+  handlePublishCalendar(eventId:number){
+    if(!this.time) return
+    // Index.ets
+    const event: calendarManager.Event = {
+      // 日程标题
+      title: this.title,
+      // 日程类型，不推荐三方开发者使用calendarManager.EventType.IMPORTANT，重要日程类型不支持一键服务跳转功能及无法自定义提醒时间
+      type: calendarManager.EventType.NORMAL,
+      // 日程开始时间
+      startTime: this.time!.getTime(),
+      // 日程结束时间
+      endTime: this.time!.getTime() + 60 * 60 * 1000,
+      // 距开始时间提前10分钟提醒
+      reminderTime: [5],
+
+    };
+
+    this.calendar?.addEvent(event).then((data: number) => {
+      console.info(`Succeeded in adding event, id -> ${data}`);
+      eventId = data;
+    }).catch((err: BusinessError) => {
+      console.error(`Failed to addEvent. Code: ${err.code}, message: ${err.message}`);
+    });
+
+    //todo
+    // 待办完成的时候，待办删除的时候，都要移除日程
+  }
   handleSubmit(){
-    this.onSubmit(this.title,this.time,this.memo)
+    this.onSubmit(this.title,this.time?formatDate(this.time):null,this.memo).then(data=>{
+
+      this.handlePublishCalendar(Number(data))
+    })
   }
   build() {
 
@@ -57,16 +92,24 @@ export struct TodoCreate {
 
       Row(){
         Text('时间提醒')
-        TextInput({text:$$this.time,placeholder:'请选择提醒时间'}).focusable(false).layoutWeight(1).backgroundColor(Color.Transparent)
+        TextInput(
+          {
+            text:this.time?formatDate(this.time):null,
+            placeholder:'请选择提醒时间',
+            controller:this.textController
+          })
+          .focusable(false)
+          .layoutWeight(1)
+          .backgroundColor(Color.Transparent)
           .onClick(()=>{
             this.openDateTimePicker((v)=>{
-              //
-              this.time = formatDate(v)
+              this.time = v
             })
           }).padding({right: 15})
         if(this.time){
-          SymbolGlyph($r('sys.symbol.xmark_circle')).fontSize(16).onClick(()=>{
-            this.time = null
+          SymbolGlyph($r('sys.symbol.xmark_circle'))
+            .fontSize(16).onClick(()=>{
+            this.textController.deleteText()
           })
         }else {
 
