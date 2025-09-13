@@ -1,15 +1,15 @@
 import { TodoItemSimpleModel } from "../model/Todo"
+import { ITransitionRouteParam } from "../types"
 import { formatDate } from "../utils/DateUtil"
-import { TodoCreate } from "./TodoCreate"
+import { TodoCreate } from "./TodoCreateFormView"
 import { endBuilder, TodoItem } from "./TodoItem"
 
 let id = 0
 @ComponentV2
 export default struct TodoView {
-  @Local list: TodoItemSimpleModel[] = [
-
-  ]
-  @Local sheetOpen:boolean = false
+  @Consumer() pagePathStackInfos:NavPathStack = new NavPathStack()
+  @Local private list: TodoItemSimpleModel[] = []
+  @Local private sheetOpen:boolean = false
 
   @Builder
   sheetContentBuilder(){
@@ -19,7 +19,7 @@ export default struct TodoView {
       })
     }
   }
-  handleSubmit= async (title:string,time:string|null,memo?:string)=>{
+  private handleSubmit= async (title:string,time:string|null,memo?:string)=>{
     let p = new Promise<string>((resolve,reject)=>{
       let newId = String(id++)
       this.list.push(
@@ -31,6 +31,9 @@ export default struct TodoView {
     return p
 
   }
+  private handleDetail = (param:ITransitionRouteParam)=>{
+    this.pagePathStackInfos.pushPathByName('TodoDetail',param)
+  }
   build(){
     //
     Column(){
@@ -40,7 +43,8 @@ export default struct TodoView {
           ForEach(this.list,(item:TodoItemSimpleModel)=>{
             ListItem(){
               TodoItem({
-                info: item
+                info: item,
+                onDetail:this.handleDetail
               })
             }
             .swipeAction({

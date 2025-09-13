@@ -23,6 +23,14 @@
       "data": {
         "description" : "新建备忘"
       }
+    },
+    {
+      "name": "TodoDetail",
+      "pageSourceFile": "src/main/ets/pages/TodoDetail.ets",
+      "buildFunction": "TodoDetailBuilder",
+      "data": {
+        "description" : "待办详情"
+      }
     }
 
   ]

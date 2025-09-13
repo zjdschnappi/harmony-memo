@@ -15,7 +15,7 @@ struct Index {
   @Provider() calendar?:calendarManager.Calendar
   // 允许进行自定义转场的页面名称
   private allowedCustomTransitionFromPageName: string[] = ['Home'];
-  private allowedCustomTransitionToPageName: string[] = ['MemoDetail'];
+  private allowedCustomTransitionToPageName: string[] = ['MemoDetail','TodoDetail'];
 
 
   initCalendar(){
