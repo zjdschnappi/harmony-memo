@@ -3,6 +3,10 @@ import { dateTimePickerDialog } from "./DateTimePicker/DateTimePickerDialog";
 import { DateTimePickerParam, TimeFormat } from "./DateTimePicker/DateTimePickerInterface";
 import { calendarManager } from "@kit.CalendarKit";
 import { BusinessError } from '@kit.BasicServicesKit';
+import { createNode, ItemNode } from "./ItemNode";
+import { TodoItemSimpleModel } from "../model/Todo";
+import { TodoItemBuilder, TodoItemView } from "./TodoItem";
+
 
 @Extend(Row)
 function rowAttr(){
@@ -12,16 +16,19 @@ function rowAttr(){
   .borderRadius(15)
 }
 
+
+
 @ComponentV2
-export struct TodoCreate {
+export struct TodoCreateFormView {
   @Consumer() calendar?:calendarManager.Calendar
   @Local title:string='';
   @Local memo:string='';
   @Local time:Date|null = null;
+  @Local myNodeController: ItemNode<TodoItemSimpleModel> | undefined = new ItemNode(false);
   @Param @Require onSubmit:(title:string,time:string|null,memo?:string)=>Promise<string>
 
   private textController:TextInputController = new TextInputController()
-
+  private wrapBuilder = wrapBuilder(TodoItemBuilder)
   private openDateTimePicker = ( onConfirm: (selectedDate: Date) => void) => {
     dateTimePickerDialog(this.getUIContext(), {
       data: {
@@ -75,19 +82,27 @@ export struct TodoCreate {
     //todo
     // 待办完成的时候，待办删除的时候，都要移除日程
   }
-  handleSubmit(){
+  private handleSubmit(){
     this.onSubmit(this.title,this.time?formatDate(this.time):null,this.memo).then(data=>{
 
       this.handlePublishCalendar(Number(data))
     })
+  }
+
+  aboutToAppear(): void {
+      // 新建自定义节点
+    let  node = createNode<TodoItemSimpleModel>(this.getUIContext(),{item:null,isExpand: false,
+      // todo 增加文字输入的回调
+    },this.wrapBuilder);
+
+    this.myNodeController = node
   }
   build() {
 
     Column({space: 15}){
 
       Row(){
-        Text('待办事项')
-        TextInput({text: $$this.title,placeholder:'请输入待办事项'}).layoutWeight(1).backgroundColor(Color.Transparent)
+        NodeContainer(this.myNodeController)
       }.rowAttr()
 
       Row(){

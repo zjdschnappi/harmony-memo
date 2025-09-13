@@ -6,6 +6,7 @@ import { RectInfoInPx } from '../utils/ComponentAttrUtils'
 import { CustomTitleBar } from '../components/CustomTitleBar';
 import { SharePanel } from '../components/SharePanel';
 import EventManager, { EventTypes } from '../utils/EventManager';
+import { TodoCreateFormView } from '../components/TodoCreateFormView';
 
 @Builder
 function TodoDetailBuilder(){
@@ -78,8 +79,13 @@ struct TodoDetail {
             CustomTitleBar({onBackPress:this.handleBack})
 
               .padding({left: 15,right: 15})
-            NodeContainer(this.myNodeController)
+            // NodeContainer(this.myNodeController)
             if(this.AnimationProperties.showDetailContent){
+              TodoCreateFormView({
+                onSubmit:()=>{
+                  return Promise.resolve('1')
+                }
+              })
               Row(){
                 SharePanel({targetViewComponentId:''})
                 SymbolGlyph($r('sys.symbol.trash')).fontSize(30).onClick(()=>{

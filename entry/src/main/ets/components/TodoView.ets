@@ -1,7 +1,7 @@
 import { TodoItemSimpleModel } from "../model/Todo"
 import { ITransitionRouteParam } from "../types"
 import { formatDate } from "../utils/DateUtil"
-import { TodoCreate } from "./TodoCreateFormView"
+import { TodoCreateFormView } from "./TodoCreateFormView"
 import { endBuilder, TodoItem } from "./TodoItem"
 
 let id = 0
@@ -14,7 +14,7 @@ export default struct TodoView {
   @Builder
   sheetContentBuilder(){
     Column(){
-      TodoCreate({
+      TodoCreateFormView({
         onSubmit: this.handleSubmit
       })
     }

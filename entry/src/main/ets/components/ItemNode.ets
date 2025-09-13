@@ -1,20 +1,16 @@
 // 跨容器迁移能力
 import { UIContext } from '@ohos.arkui.UIContext';
 import { NodeController, BuilderNode, FrameNode } from '@ohos.arkui.node';
+import { IItemNodeBuilderProp } from '../types';
 
-
-interface IBuilderProp<T> {
-  item: T;
-  isExpand?:boolean
-}
 
 
 
 export class ItemNode<T extends CommonNode = CommonNode> extends NodeController {
-  private node: BuilderNode<IBuilderProp<T>[]> | null = null;
+  private node: BuilderNode<IItemNodeBuilderProp<T>[]> | null = null;
   private isRemove: boolean = false;
   private item: T|null = null
-  wrapBuilder?: WrappedBuilder<IBuilderProp<T>[]>
+  wrapBuilder?: WrappedBuilder<IItemNodeBuilderProp<T>[]>
   private needCreate: boolean = false;
   constructor(create: boolean) {
     super();
@@ -25,7 +21,7 @@ export class ItemNode<T extends CommonNode = CommonNode> extends NodeController 
       return null;
     }
     if (this.needCreate && this.node == null) {
-      this.node = new BuilderNode<IBuilderProp<T>[]>(uiContext);
+      this.node = new BuilderNode<IItemNodeBuilderProp<T>[]>(uiContext);
       this.node.build(this.wrapBuilder)
     }
     if (this.node == null) {
@@ -33,11 +29,11 @@ export class ItemNode<T extends CommonNode = CommonNode> extends NodeController 
     }
     return this.node!.getFrameNode()!;
   }
-  getNode(): BuilderNode<IBuilderProp<T>[]> | null {
+  getNode(): BuilderNode<IItemNodeBuilderProp<T>[]> | null {
     return this.node;
   }
 
-  setNode(node: BuilderNode<IBuilderProp<T>[]> | null) {
+  setNode(node: BuilderNode<IItemNodeBuilderProp<T>[]> | null) {
     this.node = node;
     this.rebuild();
   }
@@ -47,16 +43,17 @@ export class ItemNode<T extends CommonNode = CommonNode> extends NodeController 
     this.rebuild();
     this.isRemove = false;
   }
-  init(uiContext: UIContext, item: T, isExpand: boolean,wrapBuilder?:WrappedBuilder<IBuilderProp<T>[]>) {
+  init(uiContext: UIContext, builderData:IItemNodeBuilderProp<T>,wrapBuilder?:WrappedBuilder<IItemNodeBuilderProp<T>[]>) {
     if (this.node != null) {
       return;
     }
-    this.item = item
+    this.item = builderData.item
     this.wrapBuilder = wrapBuilder
     // 创建节点，需要uiContext
     this.node = new BuilderNode(uiContext)
     // 创建离线组件
-    this.node.build(this.wrapBuilder, { item: item, isExpand: isExpand })
+    // this.node.build(this.wrapBuilder, { item: item, isExpand: isExpand })
+    this.node.build(this.wrapBuilder, builderData)
   }
 
   update(isExpand: boolean) {
@@ -75,10 +72,12 @@ interface CommonNode {
 let gNodeMap: Map<string, ItemNode<ESObject> | undefined> = new Map();
 
 export const createNode =
-  <T extends CommonNode>(uiContext: UIContext, item: T, isExpand: boolean,wrapBuilder?:WrappedBuilder<IBuilderProp<T>[]>): ItemNode<T> | undefined => {
+  <T extends CommonNode>(uiContext: UIContext, builderData:IItemNodeBuilderProp<T> ,wrapBuilder?:WrappedBuilder<IItemNodeBuilderProp<T>[]>): ItemNode<T> | undefined => {
     let node:ItemNode<T> = new ItemNode(false);
-    node.init(uiContext, item, isExpand,wrapBuilder);
-    gNodeMap.set(item.id, node);
+    node.init(uiContext, builderData,wrapBuilder);
+    if(builderData?.item?.id){
+      gNodeMap.set(builderData.item.id, node);
+    }
     return node;
   }
 

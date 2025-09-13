@@ -42,6 +42,6 @@ export interface ITypingStyleParam{
 
 
 export interface IItemNodeBuilderProp<T> {
-  item: T;
-  isExpand?:boolean
+  item: T | null;
+  isExpand?:boolean,
 }

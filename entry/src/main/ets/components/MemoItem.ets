@@ -9,7 +9,7 @@ import { MemoItemView } from './MemoItemView';
 @Builder
 export function MemoItemBuilder(data: IItemNodeBuilderProp<MemoSimpleListItemModel>) {
   // 跨容器迁移组件置于@Builder内
-  MemoItemView({item:data.item, isExpand:data.isExpand}).id(data.item.memoId)
+  MemoItemView({item:data.item, isExpand:data.isExpand}).id(data.item?.memoId)
 }
 
 @ComponentV2
@@ -26,7 +26,7 @@ export struct MemoItem {
   private doFinishTransition(id:string){
     // MemoDetail结束转场时将节点从MemoDetail迁移回Home
     deleteNode(id)
-    this.memoItemNode = createNode(this.getUIContext(),this.item,false,this.wrapBuilder);
+    this.memoItemNode = createNode(this.getUIContext(),{item:this.item, isExpand: false},this.wrapBuilder);
     this.memoItemNode?.update(false)
   }
 
@@ -56,7 +56,7 @@ export struct MemoItem {
     let node = getNode<MemoSimpleListItemModel>(this.item.memoId);
     if (node == undefined) {
       // 新建自定义节点
-      node = createNode<MemoSimpleListItemModel>(this.getUIContext(),this.item, false,this.wrapBuilder);
+      node = createNode<MemoSimpleListItemModel>(this.getUIContext(),{item:this.item, isExpand: false},this.wrapBuilder);
     }
     this.memoItemNode = node
   }
