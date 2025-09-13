@@ -1,22 +1,32 @@
 import { MemoSimpleListItemModel } from '../model/Memo';
-import { IMemoRouteParam,IRectInfoInPx } from '../types';
+import { IItemNodeBuilderProp, ITransitionRouteParam,IRectInfoInPx } from '../types';
 import { ComponentAttrUtils, RectInfoInPx } from '../utils/ComponentAttrUtils';
 import { WindowUtils } from '../utils/WindowUtils';
-import { createNode, deleteNode, getNode, MemoItemNode } from './MemoItemNode';
+import { createNode, deleteNode, getNode, ItemNode } from './ItemNode';
+import { MemoItemView } from './MemoItemView';
+
+
+@Builder
+export function MemoItemBuilder(data: IItemNodeBuilderProp<MemoSimpleListItemModel>) {
+  // 跨容器迁移组件置于@Builder内
+  MemoItemView({item:data.item, isExpand:data.isExpand}).id(data.item.memoId)
+}
 
 @ComponentV2
 export struct MemoItem {
   @Param @Require item:MemoSimpleListItemModel
-  @Local memoItemNode: MemoItemNode | undefined = new MemoItemNode(false)
-  @Param onDetail:((item:IMemoRouteParam)=>void)|null= null
+  @Local memoItemNode: ItemNode<MemoSimpleListItemModel> | undefined = new ItemNode(false)
+  @Param onDetail:((item:ITransitionRouteParam)=>void)|null= null
   @Param checkable: boolean = false;
   @Param checked: boolean = false;
   @Param onCheck:(id:string,checked:boolean)=>void = ()=>{}
 
+  private wrapBuilder = wrapBuilder(MemoItemBuilder)
+
   private doFinishTransition(id:string){
     // MemoDetail结束转场时将节点从MemoDetail迁移回Home
     deleteNode(id)
-    this.memoItemNode = createNode(this.getUIContext(),this.item,false);
+    this.memoItemNode = createNode(this.getUIContext(),this.item,false,this.wrapBuilder);
     this.memoItemNode?.update(false)
   }
 
@@ -24,7 +34,7 @@ export struct MemoItem {
 
     let itemRectInfo: RectInfoInPx =
       ComponentAttrUtils.getRectInfoById(WindowUtils.window.getUIContext(), item.memoId);
-    let param:IMemoRouteParam = {
+    let param:ITransitionRouteParam = {
       itemRectInfo:itemRectInfo as IRectInfoInPx,
       id:item.memoId,
       doDefaultTransition:() => {
@@ -43,10 +53,10 @@ export struct MemoItem {
 
   }
   aboutToAppear(): void {
-    let node = getNode(this.item.memoId);
+    let node = getNode<MemoSimpleListItemModel>(this.item.memoId);
     if (node == undefined) {
       // 新建自定义节点
-      node = createNode(this.getUIContext(),this.item,false);
+      node = createNode<MemoSimpleListItemModel>(this.getUIContext(),this.item, false,this.wrapBuilder);
     }
     this.memoItemNode = node
   }

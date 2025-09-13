@@ -1,26 +1,20 @@
 // 跨容器迁移能力
 import { UIContext } from '@ohos.arkui.UIContext';
 import { NodeController, BuilderNode, FrameNode } from '@ohos.arkui.node';
-import { MemoItemView } from './MemoItemView'
-import { MemoSimpleListItemModel } from '../model/Memo';
 
-interface IBuilderProp {
-  item: MemoSimpleListItemModel;
+
+interface IBuilderProp<T> {
+  item: T;
   isExpand?:boolean
 }
 
-@Builder
-function MemoItemBuilder(data: IBuilderProp) {
-  // 跨容器迁移组件置于@Builder内
-  MemoItemView({item:data.item, isExpand:data.isExpand}).id(data.item.memoId)
-}
 
 
-export class MemoItemNode extends NodeController {
-  private node: BuilderNode<IBuilderProp[]> | null = null;
+export class ItemNode<T extends CommonNode = CommonNode> extends NodeController {
+  private node: BuilderNode<IBuilderProp<T>[]> | null = null;
   private isRemove: boolean = false;
-  private item: MemoSimpleListItemModel|null = null
-  private wrapBuilder: WrappedBuilder<IBuilderProp[]> = wrapBuilder(MemoItemBuilder);
+  private item: T|null = null
+  wrapBuilder?: WrappedBuilder<IBuilderProp<T>[]>
   private needCreate: boolean = false;
   constructor(create: boolean) {
     super();
@@ -31,7 +25,7 @@ export class MemoItemNode extends NodeController {
       return null;
     }
     if (this.needCreate && this.node == null) {
-      this.node = new BuilderNode<IBuilderProp[]>(uiContext);
+      this.node = new BuilderNode<IBuilderProp<T>[]>(uiContext);
       this.node.build(this.wrapBuilder)
     }
     if (this.node == null) {
@@ -39,11 +33,11 @@ export class MemoItemNode extends NodeController {
     }
     return this.node!.getFrameNode()!;
   }
-  getNode(): BuilderNode<IBuilderProp[]> | null {
+  getNode(): BuilderNode<IBuilderProp<T>[]> | null {
     return this.node;
   }
 
-  setNode(node: BuilderNode<IBuilderProp[]> | null) {
+  setNode(node: BuilderNode<IBuilderProp<T>[]> | null) {
     this.node = node;
     this.rebuild();
   }
@@ -53,11 +47,12 @@ export class MemoItemNode extends NodeController {
     this.rebuild();
     this.isRemove = false;
   }
-  init(uiContext: UIContext, item: MemoSimpleListItemModel, isExpand: boolean) {
+  init(uiContext: UIContext, item: T, isExpand: boolean,wrapBuilder?:WrappedBuilder<IBuilderProp<T>[]>) {
     if (this.node != null) {
       return;
     }
     this.item = item
+    this.wrapBuilder = wrapBuilder
     // 创建节点，需要uiContext
     this.node = new BuilderNode(uiContext)
     // 创建离线组件
@@ -73,17 +68,21 @@ export class MemoItemNode extends NodeController {
 
 }
 
-let gNodeMap: Map<string, MemoItemNode | undefined> = new Map();
+interface CommonNode {
+  id:string
+}
+
+let gNodeMap: Map<string, ItemNode<ESObject> | undefined> = new Map();
 
 export const createNode =
-  (uiContext: UIContext, item: MemoSimpleListItemModel, isExpand: boolean): MemoItemNode | undefined => {
-    let node = new MemoItemNode(false);
-    node.init(uiContext, item, isExpand);
-    gNodeMap.set(item.memoId, node);
+  <T extends CommonNode>(uiContext: UIContext, item: T, isExpand: boolean,wrapBuilder?:WrappedBuilder<IBuilderProp<T>[]>): ItemNode<T> | undefined => {
+    let node:ItemNode<T> = new ItemNode(false);
+    node.init(uiContext, item, isExpand,wrapBuilder);
+    gNodeMap.set(item.id, node);
     return node;
   }
 
-export const getNode = (id: string): MemoItemNode | undefined => {
+export const getNode = <T extends CommonNode>(id: string): ItemNode<T> | undefined => {
   if (!gNodeMap.has(id)) {
     return undefined
   }

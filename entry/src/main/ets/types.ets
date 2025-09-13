@@ -8,7 +8,7 @@ export interface IRectInfoInPx {
   height: number
 }
 
-export interface IMemoRouteParam {
+export interface ITransitionRouteParam {
   id: string;
   doDefaultTransition?:()=>void;
   itemRectInfo?: IRectInfoInPx
@@ -38,4 +38,10 @@ export interface ITypingStyleParam{
   isBold?: boolean;
   isItalic?: boolean;
   isUnderline?: boolean;
+}
+
+
+export interface IItemNodeBuilderProp<T> {
+  item: T;
+  isExpand?:boolean
 }

@@ -3,7 +3,7 @@
 import { curves, UIContext } from '@kit.ArkUI';
 import { RectInfoInPx } from '../utils/ComponentAttrUtils';
 import { WindowUtils } from '../utils/WindowUtils';
-import { MemoItemNode } from '../components/MemoItemNode';
+import { ItemNode } from '../components/ItemNode';
 
 const TAG: string = 'AnimationProperties';
 
@@ -28,7 +28,7 @@ export class AnimationProperties {
   }
 
   public doAnimation(cardItemInfo_px: RectInfoInPx, isPush: boolean, isExit: boolean,
-    transitionProxy: NavigationTransitionProxy, extraTranslateValue: number, prePageOnFinish: (node: MemoItemNode) => void, myNodeController: MemoItemNode | undefined): void {
+    transitionProxy: NavigationTransitionProxy, extraTranslateValue: number, prePageOnFinish: (node: ItemNode) => void, myNodeController: ItemNode | undefined): void {
     // 首先计算卡片的宽高与窗口宽高的比例
     let widthScaleRatio = cardItemInfo_px.width / WindowUtils.windowWidth_px;
     let heightScaleRatio = cardItemInfo_px.height / WindowUtils.windowHeight_px;

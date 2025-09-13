@@ -1,5 +1,5 @@
 import { MemoSimpleListItemModel } from "../model/Memo"
-import { IMemoRouteParam } from "../types"
+import { ITransitionRouteParam } from "../types"
 import MemoViewModel from '../viewmodel/MemoViewModel'
 import { CustomTitleBar } from "./CustomTitleBar"
 import { MemoItem } from './MemoItem'
@@ -227,7 +227,7 @@ export default struct MemoView {
       }
     })
   }
-  handleDetail=(params:IMemoRouteParam)=>{
+  handleDetail=(params:ITransitionRouteParam)=>{
     this.pagePathStackInfos.pushPathByName('MemoDetail',params)
   }
 
@@ -244,7 +244,7 @@ export default struct MemoView {
               ListItem(){
                 MemoItem({
                   item:item,
-                  onDetail:(params:IMemoRouteParam)=>{
+                  onDetail:(params:ITransitionRouteParam)=>{
                    this.handleDetail(params)
                   }
                 })
@@ -279,7 +279,7 @@ export default struct MemoView {
         SymbolGlyph($r('sys.symbol.plus_circle'))
           .fontSize(30)
           .onClick(()=>{
-            const params:IMemoRouteParam= {id:'-1'}
+            const params:ITransitionRouteParam= {id:'-1'}
             this.pagePathStackInfos.pushPathByName('CreateMemo',params)
           })
       }

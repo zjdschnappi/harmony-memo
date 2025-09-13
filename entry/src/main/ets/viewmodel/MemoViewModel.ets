@@ -65,6 +65,7 @@ class MemoViewModel {
       let simpleContent = simple[0];
       let imgUrls = simple[1]
        return {
+         id: item.memoId,
          memoId:item.memoId,
          title: item.title,
          simpleContent:simpleContent,

@@ -1,7 +1,7 @@
 import { CustomTransition } from '../customTransition/CustomNavigationUtils';
-import { getNode, MemoItemNode } from '../components/MemoItemNode'
+import { getNode, ItemNode } from '../components/ItemNode'
 import { AnimationProperties } from '../customTransition/AnimationProperties'
-import {IMemoRouteParam} from '../types'
+import { ITransitionRouteParam } from '../types'
 import { RectInfoInPx } from '../utils/ComponentAttrUtils'
 import MemoViewModel from '../viewmodel/MemoViewModel'
 import { CustomTitleBar } from '../components/CustomTitleBar';
@@ -18,10 +18,9 @@ function MemoDetailBuilder(){
 struct MemoDetail {
   pageInfos:NavPathStack = new NavPathStack()
   @State AnimationProperties: AnimationProperties = new AnimationProperties(this.getUIContext());
-  @State myNodeController: MemoItemNode | undefined = new MemoItemNode(false);
-
+  @State myNodeController: ItemNode | undefined = new ItemNode(false);
   private pageId: number = -1;
-  private pageParams:IMemoRouteParam = {id:'-1'}
+  private pageParams:ITransitionRouteParam = {id:'-1'}
   private shouldDoDefaultTransition: boolean = false;
   private prePageDoFinishTransition: (() => void) = () => {};
   private itemRectInfo: RectInfoInPx = new RectInfoInPx();
@@ -44,9 +43,6 @@ struct MemoDetail {
     }
     this.pageInfos.pop();
     return true;
-  }
-  private handleShare(){
-    //
   }
   private handleDelete(){
     //
@@ -72,7 +68,7 @@ struct MemoDetail {
   }
   private handleEdit(){
     //
-    let params:IMemoRouteParam = {id:this.pageParams.id}
+    let params:ITransitionRouteParam = {id:this.pageParams.id}
     this.pageInfos.pushPathByName('CreateMemo',params,false)
   }
   private handleBack = () =>{
@@ -126,7 +122,7 @@ struct MemoDetail {
       this.pageInfos = context.pathStack;
       this.pageId = this.pageInfos.getAllPathName().length - 1;
 
-      let param = context.pathInfo?.param as IMemoRouteParam;
+      let param = context.pathInfo?.param as ITransitionRouteParam;
       this.pageParams = param
       this.myNodeController = getNode(param.id);
       this.myNodeController?.update(true)

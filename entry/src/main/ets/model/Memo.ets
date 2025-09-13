@@ -64,6 +64,7 @@ export interface  IMemoDbEntityModel {
 
 
 export interface IMemoSimpleListItemModel {
+  id: string
   memoId: string
   title: string
   simpleContent: string;
@@ -98,6 +99,7 @@ export interface IMemoUpdateModel {
 
 @ObservedV2
 export class MemoSimpleListItemModel implements  IMemoSimpleListItemModel {
+  @Trace id:string;
   @Trace memoId:string
   @Trace title:string
   @Trace simpleContent:string
@@ -108,6 +110,7 @@ export class MemoSimpleListItemModel implements  IMemoSimpleListItemModel {
   @Trace isArchived: boolean
 
   constructor(
+    id:string,
     memoId: string,
     title: string,
     simpleContent: string,
@@ -118,6 +121,7 @@ export class MemoSimpleListItemModel implements  IMemoSimpleListItemModel {
     isArchived: boolean
   ) {
     this.memoId = memoId;
+    this.id = id;
     this.simpleContent = simpleContent
     this.createdTime = createdTime;
     this.modifiedTime = modifiedTime;

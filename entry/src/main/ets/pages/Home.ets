@@ -2,7 +2,7 @@ import MemoView from '../components/MemoView';
 import TodoView from '../components/TodoView';
 import MemoViewModel from '../viewmodel/MemoViewModel'
 import {  MemoSimpleListItemModel } from '../model/Memo';
-import { IMemoRouteParam } from '../types';
+import { ITransitionRouteParam } from '../types';
 import { CustomTransition } from '../customTransition/CustomNavigationUtils';
 import EventManager, { EventTypes } from '../utils/EventManager'
 
@@ -53,6 +53,7 @@ function syncArrays(oldArray:MemoSimpleListItemModel[], newArray:MemoSimpleListI
     } else {
       // 新增项
       oldArray.push(new MemoSimpleListItemModel(
+        newItem.id,
         newItem.memoId,
         newItem.title,
         newItem.simpleContent,

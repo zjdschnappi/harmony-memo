@@ -1,7 +1,7 @@
 import { Editor } from './Editor/Editor'
 import MemoViewModel from '../viewmodel/MemoViewModel'
 import { IMemoContentItem } from "../model/Memo";
-import { IMemoRouteParam } from '../types'
+import { ITransitionRouteParam } from '../types'
 import EventManager, {EventTypes} from '../utils/EventManager'
 
 @ComponentV2
@@ -10,7 +10,7 @@ export struct MemoDetailView {
   @Local memoTitle:string = ''
   @Param  onGetTitle?:(title:string)=>void = () =>{}
   @Param editorOptions: RichEditorOptions = { controller: new RichEditorController() };
-  @Param pageParams:IMemoRouteParam ={id:'-1'}
+  @Param pageParams:ITransitionRouteParam ={id:'-1'}
 
   @Monitor('memoTitle')
   titleChange(){

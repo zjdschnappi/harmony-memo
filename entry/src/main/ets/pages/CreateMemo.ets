@@ -1,6 +1,6 @@
 import { KeyboardAvoidMode } from "@ohos.arkui.UIContext";
 import MemoViewModel from '../viewmodel/MemoViewModel'
-import { IMemoRouteParam,  } from "../types";
+import { ITransitionRouteParam,  } from "../types";
 import { MemoDetailView } from "../components/MemoDetailView";
 import { CustomTitleBar } from "../components/CustomTitleBar";
 import EventManager ,{EventTypes} from '../utils/EventManager'
@@ -27,7 +27,7 @@ function IconText(enabled:boolean = true){
 struct CreateMemo {
   private pageInfos:NavPathStack = new NavPathStack()
   private editorOptions: RichEditorOptions = { controller: new RichEditorController() };
-  private pageParams:IMemoRouteParam ={id:'-1'}
+  private pageParams:ITransitionRouteParam ={id:'-1'}
   @Provider() historyManager: EditorHistoryManager = new EditorHistoryManager(this.editorOptions.controller)
   @Local memoTitle:string = '标题'
 
@@ -102,7 +102,7 @@ struct CreateMemo {
     .onReady((ctx)=>{
 
       this.pageInfos = ctx.pathStack
-      this.pageParams = ctx.pathInfo.param as IMemoRouteParam
+      this.pageParams = ctx.pathInfo.param as ITransitionRouteParam
 
     })
     .height('100%')
