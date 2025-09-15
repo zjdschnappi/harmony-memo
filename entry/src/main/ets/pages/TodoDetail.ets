@@ -76,11 +76,10 @@ struct TodoDetail {
       Stack({alignContent:Alignment.Start}){
         Stack({alignContent:Alignment.Start}){
           Column() {
-            CustomTitleBar({onBackPress:this.handleBack})
 
-              .padding({left: 15,right: 15})
-            // NodeContainer(this.myNodeController)
             if(this.AnimationProperties.showDetailContent){
+              CustomTitleBar({onBackPress:this.handleBack})
+                .padding({left: 15,right: 15})
               TodoCreateFormView({
                 onSubmit:()=>{
                   return Promise.resolve('1')

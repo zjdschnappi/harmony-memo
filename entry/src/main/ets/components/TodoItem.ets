@@ -21,6 +21,8 @@ export struct TodoItemView {
   @Param isExpand:boolean = false
   @Param onCheck:(v:boolean)=>void = ()=>{}
   @Param onInput:(v:string)=>void = ()=>{}
+  @Param checkable:boolean = false
+
   build() {
     Row(){
       Checkbox()
@@ -28,16 +30,16 @@ export struct TodoItemView {
         .onChange((v)=>{
           this.onCheck?.(v)
         })
+        .enabled(this.checkable)
       Column({space: 15}){
         TextInput({text:this.info?.title,placeholder:'待办事项'})
           .onChange((v)=>{
             this.onInput?.(v)
           })
-          .focusable(false)
           .fontColor(this.info?.isCompleted ? Color.Gray : Color.Black)
           .decoration({ type: this.info?.isCompleted ? TextDecorationType.LineThrough : TextDecorationType.None })
           .backgroundColor(Color.Transparent)
-          .hitTestBehavior(HitTestMode.None)
+          .hitTestBehavior(this.isExpand?HitTestMode.Default:HitTestMode.None)
         if(this.info?.dueTime){
           Text(this.info?.dueTime).fontSize(12)
         }
@@ -110,7 +112,8 @@ export struct TodoItem {
     .backgroundColor(Color.White)
     .width('90%')
     .borderRadius(15)
-    .padding({top: 20,bottom:20,left: 15,right: 15})
+    .padding({left: 15})
+    .height(65)
   }
 }
 

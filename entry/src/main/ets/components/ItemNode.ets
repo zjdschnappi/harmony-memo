@@ -9,7 +9,7 @@ import { IItemNodeBuilderProp } from '../types';
 export class ItemNode<T extends CommonNode = CommonNode> extends NodeController {
   private node: BuilderNode<IItemNodeBuilderProp<T>[]> | null = null;
   private isRemove: boolean = false;
-  private item: T|null = null
+  private builderData: IItemNodeBuilderProp<T>|null = null
   wrapBuilder?: WrappedBuilder<IItemNodeBuilderProp<T>[]>
   private needCreate: boolean = false;
   constructor(create: boolean) {
@@ -47,7 +47,7 @@ export class ItemNode<T extends CommonNode = CommonNode> extends NodeController 
     if (this.node != null) {
       return;
     }
-    this.item = builderData.item
+    this.builderData = builderData
     this.wrapBuilder = wrapBuilder
     // 创建节点，需要uiContext
     this.node = new BuilderNode(uiContext)
@@ -59,7 +59,11 @@ export class ItemNode<T extends CommonNode = CommonNode> extends NodeController 
   update(isExpand: boolean) {
     if (this.node !== null) {
       // 调用update进行更新。
-      this.node.update({ item: this.item, isExpand: isExpand });
+      if(this.builderData){
+
+        this.builderData.isExpand = isExpand
+      }
+      this.node.update(this.builderData);
     }
   }
 

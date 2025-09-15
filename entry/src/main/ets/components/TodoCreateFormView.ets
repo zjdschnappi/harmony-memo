@@ -5,7 +5,7 @@ import { calendarManager } from "@kit.CalendarKit";
 import { BusinessError } from '@kit.BasicServicesKit';
 import { createNode, ItemNode } from "./ItemNode";
 import { TodoItemSimpleModel } from "../model/Todo";
-import { TodoItemBuilder, TodoItemView } from "./TodoItem";
+import { ICreateItemNodeBuilderProp, TodoItemBuilder } from "./TodoItem";
 
 
 @Extend(Row)
@@ -82,18 +82,25 @@ export struct TodoCreateFormView {
     //todo
     // 待办完成的时候，待办删除的时候，都要移除日程
   }
-  private handleSubmit(){
+  private handleSubmit=()=>{
     this.onSubmit(this.title,this.time?formatDate(this.time):null,this.memo).then(data=>{
 
       this.handlePublishCalendar(Number(data))
     })
   }
+  private handleInput=(v:string)=>{
+    //
+    this.title = v
+  }
 
   aboutToAppear(): void {
       // 新建自定义节点
-    let  node = createNode<TodoItemSimpleModel>(this.getUIContext(),{item:null,isExpand: false,
-      // todo 增加文字输入的回调
-    },this.wrapBuilder);
+    let builderData:ICreateItemNodeBuilderProp = {
+      item:null,
+      isExpand:true,
+      onInput:this.handleInput
+    }
+    let  node = createNode<TodoItemSimpleModel>(this.getUIContext(),builderData,this.wrapBuilder);
 
     this.myNodeController = node
   }

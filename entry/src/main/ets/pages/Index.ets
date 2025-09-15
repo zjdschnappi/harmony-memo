@@ -37,7 +37,7 @@ struct Index {
       enableReminder: true,
       // 设置日历账户颜色
       color: '#aabbcc'
-    };
+    }
     // 创建日历账户
     calendarMgr?.createCalendar(calendarAccount).then((data: calendarManager.Calendar) => {
       console.info(`Succeeded in creating calendar data->${JSON.stringify(data)}`);
