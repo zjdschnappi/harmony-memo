@@ -3,8 +3,67 @@ import { ITransitionRouteParam } from "../types"
 import { formatDate } from "../utils/DateUtil"
 import { TodoCreateFormView } from "./TodoCreateFormView"
 import { endBuilder, TodoItem } from "./TodoItem"
+import TodoViewModel from '../viewmodel/TodoViewModel'
+import EventManager, { EventTypes } from '../utils/EventManager'
 
-let id = 0
+interface IParam {
+  item: TodoItemSimpleModel;
+  index:number
+}
+function syncArrays(oldArray:TodoItemSimpleModel[], newArray:TodoItemSimpleModel[]) {
+  // 创建ID映射以便快速查找
+  const oldMap = new Map<string,IParam>();
+  oldArray.forEach((item, index) => oldMap.set(item.todoId, { item, index }));
+
+  const newMap = new Map<string,TodoItemSimpleModel>();
+  newArray.forEach(item => newMap.set(item.todoId, item));
+
+  // 找出需要移除的数据（在旧数组但不在新数组中）
+  const toRemove:number[] = [];
+  for (let i = oldArray.length - 1; i >= 0; i--) {
+    if (!newMap.has(oldArray[i].todoId)) {
+      toRemove.push(i);
+    }
+  }
+
+  // 从后往前删除，避免索引变化问题
+  toRemove.forEach(index => {
+    oldArray.splice(index, 1);
+  });
+
+  // 更新和新增数据
+  newArray.forEach(newItem => {
+    const oldEntry = oldMap.get(newItem.todoId);
+
+    if (oldEntry) {
+      // 更新现有项
+      const oldItem = oldEntry.item;
+      oldItem.title = newItem.title
+      oldItem.memo = newItem.memo
+      oldItem.modifiedTime = newItem.modifiedTime
+      oldItem.isCompleted = newItem.isCompleted
+      oldItem.location = newItem.location
+      oldItem.dueTime = newItem.dueTime
+      oldItem.priority = newItem.priority
+
+    } else {
+      // 新增项
+      oldArray.push(new TodoItemSimpleModel(
+        newItem.id,
+        newItem.todoId,
+        newItem.title,
+        newItem.createdTime,
+        newItem.modifiedTime,
+        newItem.isCompleted,
+        newItem.priority,
+        newItem.dueTime,
+        newItem.location,
+        newItem.memo
+      ));
+    }
+  });
+}
+
 @ComponentV2
 export default struct TodoView {
   @Consumer() pagePathStackInfos:NavPathStack = new NavPathStack()
@@ -15,24 +74,28 @@ export default struct TodoView {
   sheetContentBuilder(){
     Column(){
       TodoCreateFormView({
-        onSubmit: this.handleSubmit
+        onSubmitSuccess:()=>{
+          this.sheetOpen = false
+        }
       })
     }
   }
-  private handleSubmit= async (title:string,time:string|null,memo?:string)=>{
-    let p = new Promise<string>((resolve,reject)=>{
-      let newId = String(id++)
-      this.list.push(
-        new TodoItemSimpleModel(newId,title,formatDate(new Date()),formatDate(new Date()),false,time,undefined,memo)
-      )
-      this.sheetOpen = false
-      resolve(newId)
-    })
-    return p
 
-  }
   private handleDetail = (param:ITransitionRouteParam)=>{
     this.pagePathStackInfos.pushPathByName('TodoDetail',param)
+  }
+
+  private getTodoList=()=>{
+    TodoViewModel.getTodos().then(data=>{
+      syncArrays(this.list,data)
+    })
+  }
+
+  aboutToAppear(){
+    this.getTodoList()
+    EventManager.on(EventTypes.FETCH_TODO_LIST,()=>{
+      this.getTodoList()
+    })
   }
   build(){
     //

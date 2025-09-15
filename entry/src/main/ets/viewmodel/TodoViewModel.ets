@@ -4,12 +4,10 @@ import { ITodoCreateModel, ITodoDetailModel,
 
 class TodoViewModel {
   // 创建新待办
-  async create(title: string): Promise<string> {
-    const memoContent: ITodoCreateModel = {
-      title,
-    };
+  async create(data:ITodoCreateModel): Promise<number> {
 
-    return await TodoRepository.createMemo(memoContent);
+
+    return await TodoRepository.createMemo(data);
   }
 
   // 更新备忘录内容
@@ -19,7 +17,7 @@ class TodoViewModel {
 
   // 切换置顶状态
   async toggleCompleted(id: string): Promise<boolean> {
-    return await TodoRepository.togglePin(id);
+    return await TodoRepository.toggleCompleted(id);
   }
 
   async getDetailById(id: string): Promise<ITodoDetailModel|null> {

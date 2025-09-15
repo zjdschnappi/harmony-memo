@@ -6,6 +6,8 @@ import { BusinessError } from '@kit.BasicServicesKit';
 import { createNode, ItemNode } from "./ItemNode";
 import { TodoItemSimpleModel } from "../model/Todo";
 import { ICreateItemNodeBuilderProp, TodoItemBuilder } from "./TodoItem";
+import TodoViewModel from '../viewmodel/TodoViewModel'
+import EventManager, { EventTypes } from '../utils/EventManager'
 
 
 @Extend(Row)
@@ -25,8 +27,7 @@ export struct TodoCreateFormView {
   @Local memo:string='';
   @Local time:Date|null = null;
   @Local myNodeController: ItemNode<TodoItemSimpleModel> | undefined = new ItemNode(false);
-  @Param @Require onSubmit:(title:string,time:string|null,memo?:string)=>Promise<string>
-
+  @Param onSubmitSuccess:()=>void = ()=>{}
   private textController:TextInputController = new TextInputController()
   private wrapBuilder = wrapBuilder(TodoItemBuilder)
   private openDateTimePicker = ( onConfirm: (selectedDate: Date) => void) => {
@@ -82,11 +83,21 @@ export struct TodoCreateFormView {
     //todo
     // 待办完成的时候，待办删除的时候，都要移除日程
   }
-  private handleSubmit=()=>{
-    this.onSubmit(this.title,this.time?formatDate(this.time):null,this.memo).then(data=>{
+  private handleSubmit= async ()=>{
+    try{
+      let id = await TodoViewModel.create({
+        title:this.title,
+        dueTime: this.time?formatDate(this.time):undefined,
+        memo: this.memo
+      })
 
-      this.handlePublishCalendar(Number(data))
-    })
+      EventManager.emit(EventTypes.FETCH_TODO_LIST)
+      this.handlePublishCalendar(id)
+    }
+    catch(e) {
+      console.log('222')
+    }
+
   }
   private handleInput=(v:string)=>{
     //

@@ -7,7 +7,12 @@ export enum EventTypes  {
   // ---------------
 
   EDITOR_SELECTION_CHANGE= 3, //编辑器内选区范围
-  EDITOR_ABOUT_TO_INPUT = 4
+  EDITOR_ABOUT_TO_INPUT = 4,
+
+  // -------------------
+
+  FETCH_TODO_LIST = 5,
+  FETCH_TODO_DETAIL = 6,
 
   // ... 其他事件根据需要继续添加
 }

@@ -6,7 +6,7 @@ import { formatDate } from '../utils/DateUtil';
 
 class TodoRepository {
   // 创建新备忘录
-  async createMemo(content: ITodoCreateModel): Promise<string> {
+  async createMemo(content: ITodoCreateModel): Promise<number> {
     if (!content.title.trim()) {
       throw new Error('备忘录标题不能为空');
     }
@@ -24,7 +24,7 @@ class TodoRepository {
     };
 
     const id = await TodoDao.insert(todo);
-    return bizId;
+    return id;
   }
 
   // 更新待办内容
@@ -47,8 +47,8 @@ class TodoRepository {
     return content.todoId;
   }
 
-  // 切换置顶状态
-  async togglePin(id: string): Promise<boolean> {
+  // 切换完成状态
+  async toggleCompleted(id: string): Promise<boolean> {
     const todo = await TodoDao.getById(id);
     if (!todo) {
       throw new Error('找不到待办');

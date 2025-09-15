@@ -111,9 +111,16 @@ class TodoDao {
       'created_time', 'modified_time','due_time','location_name','latitude','longitude',
       'radius','memo'
     ];
+    try{
+      const result = await store.query(predicates, columns);
+      return this.processResultSet(result);
+    }
+    catch (e) {
+      console.log('todoDao getAll',e)
+      return Promise.reject()
+    }
 
-    const result = await store.query(predicates, columns);
-    return this.processResultSet(result);
+
   }
 
   // 获取置顶备忘录
@@ -141,40 +148,46 @@ class TodoDao {
   // 处理查询结果集
   private async processResultSet(result: relationalStore.ResultSet): Promise<ITodoDetailModel[]> {
     const todos: ITodoDetailModel[] = [];
+    try{
+      while (result.goToNextRow()) {
+        // const id = result.getLong(result.getColumnIndex('id'));
+        const todoId = result.getString(result.getColumnIndex('todo_id'));
+        const title = result.getString(result.getColumnIndex('title'));
+        const isCompleted = result.getLong(result.getColumnIndex('is_completed')) === 1;
+        const createdTime = result.getLong(result.getColumnIndex('created_time'));
+        const modifiedTime = result.getLong(result.getColumnIndex('modified_time'));
+        const dueTime = result.getLong(result.getColumnIndex('due_time'));
+        const priority = result.getLong(result.getColumnIndex('priority'));
+        const location_name = result.getString(result.getColumnIndex('location_name'));
+        const latitude = result.getDouble(result.getColumnIndex('latitude'));
+        const longitude = result.getDouble(result.getColumnIndex('longitude'));
+        const radius = result.getLong(result.getColumnIndex('radius'));
+        const memo = result.getString(result.getColumnIndex('memo'));
 
-    while (result.goToNextRow()) {
-      // const id = result.getLong(result.getColumnIndex('id'));
-      const todoId = result.getString(result.getColumnIndex('todo_id'));
-      const title = result.getString(result.getColumnIndex('title'));
-      const isCompleted = result.getLong(result.getColumnIndex('is_completed')) === 1;
-      const createdTime = result.getLong(result.getColumnIndex('created_time'));
-      const modifiedTime = result.getLong(result.getColumnIndex('modified_time'));
-      const dueTime = result.getLong(result.getColumnIndex('due_time'));
-      const priority = result.getLong(result.getColumnIndex('priority'));
-      const location_name = result.getString(result.getColumnIndex('location_name'));
-      const latitude = result.getDouble(result.getColumnIndex('latitude'));
-      const longitude = result.getDouble(result.getColumnIndex('longitude'));
-      const radius = result.getLong(result.getColumnIndex('radius'));
-      const memo = result.getString(result.getColumnIndex('memo'));
 
 
+        todos.push({
+          title,
+          todoId,
+          isCompleted,
+          createdTime:formatDate(new Date(createdTime)),
+          modifiedTime:formatDate(new Date(modifiedTime)),
+          dueTime: dueTime?formatDate(new Date(dueTime)):undefined,
+          priority,
+          location: new LocationModel(location_name,latitude,longitude,radius),
+          memo
 
-      todos.push({
-        title,
-        todoId,
-        isCompleted,
-        createdTime:formatDate(new Date(createdTime)),
-        modifiedTime:formatDate(new Date(modifiedTime)),
-        dueTime: dueTime?formatDate(new Date(dueTime)):undefined,
-        priority,
-        location: new LocationModel(location_name,latitude,longitude,radius),
-        memo
+        });
+      }
 
-      });
+      result.close();
+      return todos;
+    }
+    catch (e) {
+      console.log('processResultSet',e)
+      return Promise.reject()
     }
 
-    result.close();
-    return todos;
   }
 
 }

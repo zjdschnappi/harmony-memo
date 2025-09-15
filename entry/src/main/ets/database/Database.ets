@@ -35,7 +35,8 @@ const TODO_SQL = `
     location_name TEXT,
     latitude INTEGER,
     longitude INTEGER,
-    radius INTEGER
+    radius INTEGER,
+    memo TEXT
   )
 `;
 

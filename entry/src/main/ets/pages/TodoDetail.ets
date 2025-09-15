@@ -80,11 +80,7 @@ struct TodoDetail {
             if(this.AnimationProperties.showDetailContent){
               CustomTitleBar({onBackPress:this.handleBack})
                 .padding({left: 15,right: 15})
-              TodoCreateFormView({
-                onSubmit:()=>{
-                  return Promise.resolve('1')
-                }
-              })
+              TodoCreateFormView()
               Row(){
                 SharePanel({targetViewComponentId:''})
                 SymbolGlyph($r('sys.symbol.trash')).fontSize(30).onClick(()=>{
