@@ -21,6 +21,23 @@ const TABLE_SQL = `
     modified_time INTEGER NOT NULL
   )
 `;
+// 数据库表结构
+const TODO_SQL = `
+  CREATE TABLE IF NOT EXISTS todos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    todo_id TEXT UNIQUE NOT NULL,
+    title TEXT,
+    priority INTEGER DEFAULT 3,
+    is_completed BOOLEAN DEFAULT 0,
+    created_time INTEGER NOT NULL,
+    modified_time INTEGER NOT NULL,
+    due_time INTEGER,
+    location_name TEXT,
+    latitude INTEGER,
+    longitude INTEGER,
+    radius INTEGER
+  )
+`;
 
 // 创建索引
 const INDEX_SQL = `
@@ -46,6 +63,7 @@ class Database {
             Database.instance = rdb
             Database.instance.executeSql(TABLE_SQL);
             Database.instance.executeSql(INDEX_SQL);
+            Database.instance.executeSql(TODO_SQL);
             resolve()
           }else {
             reject()
