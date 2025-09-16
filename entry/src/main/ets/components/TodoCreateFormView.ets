@@ -9,6 +9,8 @@ import { ICreateItemNodeBuilderProp, TodoItemBuilder } from "./TodoItem";
 import TodoViewModel from '../viewmodel/TodoViewModel'
 import EventManager, { EventTypes } from '../utils/EventManager'
 import { CustomTitleBar } from "./CustomTitleBar";
+import { StorageNameEnum, StorageUtil } from "../utils/StorageUtil";
+import { common } from "@kit.AbilityKit";
 
 
 @Extend(Row)
@@ -33,6 +35,7 @@ export struct TodoCreateFormView {
   @Param onCancel:()=>void = ()=>{}
   @Param detailData: ITodoDetailModel|null = null
   @Param sheetTitle:string = '新建待办'
+  private storageFromDisk = new StorageUtil(this.getUIContext().getHostContext() as common.UIAbilityContext,StorageNameEnum.CALENDAR_EVENT)
   private textController:TextInputController = new TextInputController()
   private wrapBuilder = wrapBuilder(TodoItemBuilder)
   private openDateTimePicker = ( onConfirm: (selectedDate: Date) => void) => {
@@ -61,9 +64,16 @@ export struct TodoCreateFormView {
       offset: ({ dx: 0, dy: -4 }),
     });
   }
-  handlePublishCalendar(eventId:number){
+  handlePublishCalendar(id:string){
+
+    if(this.storageFromDisk.has(id)){
+      if(!this.time){
+        this.calendar?.deleteEvent(this.storageFromDisk.get(id)as number)
+        return
+      }
+    }
+
     if(!this.time) return
-    // Index.ets
     const event: calendarManager.Event = {
       // 日程标题
       title: this.title!,
@@ -78,23 +88,31 @@ export struct TodoCreateFormView {
 
     };
 
-    this.calendar?.addEvent(event).then((data: number) => {
-      console.info(`Succeeded in adding event, id -> ${data}`);
-      eventId = data;
-    }).catch((err: BusinessError) => {
-      console.error(`Failed to addEvent. Code: ${err.code}, message: ${err.message}`);
-    });
+    if(!this.storageFromDisk.has(id)){
+      this.calendar?.addEvent(event).then((data: number) => {
+        console.info(`Succeeded in adding event, id -> ${data}`);
+        this.storageFromDisk.set(id,data)
+      }).catch((err: BusinessError) => {
+        console.error(`Failed to addEvent. Code: ${err.code}, message: ${err.message}`);
+      });
+    }
+    else {
+      event.id = this.storageFromDisk.get(id) as number
+      this.calendar?.updateEvent(event)
+    }
+
+
 
     //todo
     // 待办完成的时候，待办删除的时候，都要移除日程
   }
   private handleSubmit= async ()=>{
     if(!this.title) return
-
+    let id:string|null = null
     try{
       if(this.detailData?.todoId){
 
-        await TodoViewModel.update({
+        id = await TodoViewModel.update({
           todoId: this.detailData.todoId,
           title:this.title,
           isCompleted: this.checked,
@@ -103,7 +121,7 @@ export struct TodoCreateFormView {
         })
       }
       else {
-        let id = await TodoViewModel.create({
+        id = await TodoViewModel.create({
           title:this.title,
           dueTime: this.time?formatDate(this.time):undefined,
           memo: this.memo
@@ -111,7 +129,7 @@ export struct TodoCreateFormView {
       }
 
       EventManager.emit(EventTypes.FETCH_TODO_LIST)
-      // this.handlePublishCalendar(id)
+      this.handlePublishCalendar(id)
       this.onSubmitSuccess()
     }
     catch(e) {
@@ -149,7 +167,7 @@ export struct TodoCreateFormView {
       onInput:this.handleInput,
       onCheck: this.handleCheck
     }
-    let  node = createNode<TodoItemSimpleModel>(this.getUIContext(),builderData,this.wrapBuilder);
+    let node = createNode<TodoItemSimpleModel>(this.getUIContext(),builderData,this.wrapBuilder);
 
     this.myNodeController = node
   }
@@ -203,7 +221,7 @@ export struct TodoCreateFormView {
           SymbolGlyph($r('sys.symbol.xmark_circle'))
             .fontSize(16).onClick(()=>{
             this.textController.deleteText()
-            this.title = null
+            this.time = null
           })
         }else {
 

@@ -31,7 +31,7 @@ export struct TodoItemView {
           this.onCheck?.(v)
         })
         .enabled(!!this.info?.id)
-      Column({space: 15}){
+      Column(){
         TextInput({text:this.info?.title,placeholder:'待办事项'})
           .onChange((v)=>{
             this.onInput?.(v)

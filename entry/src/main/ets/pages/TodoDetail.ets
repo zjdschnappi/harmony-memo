@@ -3,7 +3,6 @@ import { getNode, ItemNode } from '../components/ItemNode'
 import { AnimationProperties } from '../customTransition/AnimationProperties'
 import { ITransitionRouteParam } from '../types'
 import { RectInfoInPx } from '../utils/ComponentAttrUtils'
-import { CustomTitleBar } from '../components/CustomTitleBar';
 import { SharePanel } from '../components/SharePanel';
 import { TodoCreateFormView } from '../components/TodoCreateFormView';
 import TodoViewModel from '../viewmodel/TodoViewModel'
@@ -71,11 +70,6 @@ struct TodoDetail {
       }
     })
 
-  }
-  private handleEdit(){
-    //
-    let params:ITransitionRouteParam = {id:this.pageParams.id}
-    this.pageInfos.pushPathByName('CreateMemo',params,false)
   }
   private handleBack = () =>{
     this.onBackPressed()
