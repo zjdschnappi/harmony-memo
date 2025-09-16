@@ -133,8 +133,11 @@ export struct TodoItem {
 }
 
 @Builder
-export function endBuilder(item: TodoItemSimpleModel) {
+export function endBuilder(onDelete:()=>void) {
   SymbolGlyph($r('sys.symbol.trash'))
     .fontSize(30)
     .margin({left: 15})
+    .onClick(()=>{
+      onDelete()
+    })
 }

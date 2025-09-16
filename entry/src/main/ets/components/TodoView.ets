@@ -69,6 +69,7 @@ export default struct TodoView {
   @Consumer() pagePathStackInfos:NavPathStack = new NavPathStack()
   @Local private list: TodoItemSimpleModel[] = []
   @Local private sheetOpen:boolean = false
+  private scroller:ListScroller = new ListScroller()
 
   @Builder
   sheetContentBuilder(){
@@ -86,6 +87,34 @@ export default struct TodoView {
 
   private handleDetail = (param:ITransitionRouteParam)=>{
     this.pagePathStackInfos.pushPathByName('TodoDetail',param)
+  }
+  private handleDelete = (id:string)=>{
+
+    this.getUIContext().getPromptAction().showDialog({
+      title: '提示',
+      message:'确认删除这条记录吗？',
+      buttons:[
+        {text:'取消',primary:false,color:'black'},
+        {text:'确定',primary:true,color:'red'}
+      ],
+
+    }).then((value)=>{
+      if(value.index==1){
+        //
+        TodoViewModel.delete([id]).then(()=>{
+
+          let index = this.list.findIndex(item=>item.todoId==id)
+          if(index>-1){
+            this.getUIContext().animateTo({duration:300},()=>{
+
+              this.list.splice(index,1)
+            })
+          }
+        })
+      }else {
+        this.scroller.closeAllSwipeActions()
+      }
+    })
   }
   private handleCheck = (id:string,checked:boolean)=>{
     TodoViewModel.toggleCompleted(id,checked).then(()=>{
@@ -112,7 +141,7 @@ export default struct TodoView {
     Column(){
 
       if(this.list.length){
-        List({space: 15}){
+        List({space: 15,scroller:this.scroller}){
           ForEach(this.list,(item:TodoItemSimpleModel)=>{
             ListItem(){
               TodoItem({
@@ -122,7 +151,9 @@ export default struct TodoView {
               })
             }
             .swipeAction({
-              end: endBuilder(item)
+              end: endBuilder(()=>{
+                this.handleDelete(item.todoId)
+              })
             })
           },(item:TodoItemSimpleModel)=>{
             return item.todoId
