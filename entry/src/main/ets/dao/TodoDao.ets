@@ -9,7 +9,7 @@ import { formatDate } from '../utils/DateUtil';
 const TABLE_NAME = 'todos'
 
 class TodoDao {
-  // 插入备忘录
+  // 插入待办
   async insert(item: Partial<ITodoDetailModel>): Promise<number> {
     const store = await Database.getRdbStore();
     const now = Date.now();
@@ -37,7 +37,7 @@ class TodoDao {
     return Number(result);
   }
 
-  // 更新备忘录
+  // 更新待办
   async update(item: ITodoUpdateModel): Promise<number> {
     if (!item.todoId) throw new Error('Todo ID is required for update');
 
@@ -62,7 +62,7 @@ class TodoDao {
     return await store.update(valueBucket, predicates);
   }
 
-  // 删除备忘录
+  // 删除待办
   async delete(ids: string[]): Promise<number> {
     if(ids.length==0){
       return 0
@@ -123,7 +123,7 @@ class TodoDao {
 
   }
 
-  // 获取置顶备忘录
+  // 获取已完成待办
   async getCompleted(): Promise<ITodoDetailModel[]> {
     const store = await Database.getRdbStore();
     const predicates = new relationalStore.RdbPredicates(TABLE_NAME);

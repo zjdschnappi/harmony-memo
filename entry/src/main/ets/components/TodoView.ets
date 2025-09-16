@@ -74,6 +74,9 @@ export default struct TodoView {
   sheetContentBuilder(){
     Column(){
       TodoCreateFormView({
+        onCancel:()=>{
+          this.sheetOpen = false
+        },
         onSubmitSuccess:()=>{
           this.sheetOpen = false
         }
@@ -84,7 +87,14 @@ export default struct TodoView {
   private handleDetail = (param:ITransitionRouteParam)=>{
     this.pagePathStackInfos.pushPathByName('TodoDetail',param)
   }
-
+  private handleCheck = (id:string,checked:boolean)=>{
+    TodoViewModel.toggleCompleted(id,checked).then(()=>{
+      let index = this.list.findIndex(item=>item.todoId==id)
+      if(index>-1){
+        this.list[index].isCompleted = checked
+      }
+    })
+  }
   private getTodoList=()=>{
     TodoViewModel.getTodos().then(data=>{
       syncArrays(this.list,data)
@@ -107,7 +117,8 @@ export default struct TodoView {
             ListItem(){
               TodoItem({
                 info: item,
-                onDetail:this.handleDetail
+                onDetail:this.handleDetail,
+                onCheck:this.handleCheck
               })
             }
             .swipeAction({
@@ -138,9 +149,7 @@ export default struct TodoView {
     .bindSheet($$this.sheetOpen,this.sheetContentBuilder(),{
       height: SheetSize.LARGE,
       backgroundColor: '#f3f3f3',
-      title: {
-        title: '新建待办'
-      }
+      showClose: false
 
     })
     .justifyContent(FlexAlign.Center)

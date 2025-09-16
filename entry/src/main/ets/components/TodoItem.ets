@@ -30,7 +30,7 @@ export struct TodoItemView {
         .onChange((v)=>{
           this.onCheck?.(v)
         })
-        .enabled(this.checkable)
+        .enabled(!!this.info?.id)
       Column({space: 15}){
         TextInput({text:this.info?.title,placeholder:'待办事项'})
           .onChange((v)=>{
@@ -40,7 +40,7 @@ export struct TodoItemView {
           .decoration({ type: this.info?.isCompleted ? TextDecorationType.LineThrough : TextDecorationType.None })
           .backgroundColor(Color.Transparent)
           .hitTestBehavior(this.isExpand?HitTestMode.Default:HitTestMode.None)
-        if(this.info?.dueTime){
+        if(this.info?.dueTime&&!this.isExpand){
           Text(this.info?.dueTime).fontSize(12)
         }
       }
@@ -52,6 +52,7 @@ export struct TodoItemView {
 
   }
 }
+
 
 
 @ComponentV2
@@ -68,7 +69,14 @@ export struct TodoItem {
   private doFinishTransition(id:string){
     // MemoDetail结束转场时将节点从MemoDetail迁移回Home
     deleteNode(id)
-    this.todoItemNode = createNode(this.getUIContext(),{item: this.info, isExpand: false},this.wrapBuilder);
+    let data:ICreateItemNodeBuilderProp = {
+      item: this.info,
+      isExpand: false,
+      onCheck:(v)=>{
+        this.onCheck(this.info.todoId,v)
+      }
+    }
+    this.todoItemNode = createNode(this.getUIContext(),data,this.wrapBuilder);
     this.todoItemNode?.update(false)
   }
 
@@ -98,7 +106,14 @@ export struct TodoItem {
     let node = getNode<TodoItemSimpleModel>(this.info.id);
     if (node == undefined) {
       // 新建自定义节点
-      node = createNode<TodoItemSimpleModel>(this.getUIContext(),{item:this.info,isExpand: false},this.wrapBuilder);
+      let data:ICreateItemNodeBuilderProp = {
+        item:this.info,
+        isExpand: false,
+        onCheck:(v)=>{
+          this.onCheck(this.info.todoId,v)
+        }
+      }
+      node = createNode<TodoItemSimpleModel>(this.getUIContext(),data,this.wrapBuilder);
     }
     this.todoItemNode = node
   }

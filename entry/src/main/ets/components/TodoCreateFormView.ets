@@ -8,6 +8,7 @@ import { ITodoDetailModel, TodoItemSimpleModel } from "../model/Todo";
 import { ICreateItemNodeBuilderProp, TodoItemBuilder } from "./TodoItem";
 import TodoViewModel from '../viewmodel/TodoViewModel'
 import EventManager, { EventTypes } from '../utils/EventManager'
+import { CustomTitleBar } from "./CustomTitleBar";
 
 
 @Extend(Row)
@@ -23,12 +24,15 @@ function rowAttr(){
 @ComponentV2
 export struct TodoCreateFormView {
   @Consumer() calendar?:calendarManager.Calendar
-  @Local title:string='';
-  @Local memo:string='';
-  @Local time:Date|null = null;
-  @Local myNodeController: ItemNode<TodoItemSimpleModel> | undefined = new ItemNode(false);
+  @Local private title:string|null='';
+  @Local private memo:string|null='';
+  @Local private time:Date|null = null;
+  @Local private myNodeController: ItemNode<TodoItemSimpleModel> | undefined = new ItemNode(false);
+  @Local private checked:boolean = false
   @Param onSubmitSuccess:()=>void = ()=>{}
+  @Param onCancel:()=>void = ()=>{}
   @Param detailData: ITodoDetailModel|null = null
+  @Param sheetTitle:string = '新建待办'
   private textController:TextInputController = new TextInputController()
   private wrapBuilder = wrapBuilder(TodoItemBuilder)
   private openDateTimePicker = ( onConfirm: (selectedDate: Date) => void) => {
@@ -62,7 +66,7 @@ export struct TodoCreateFormView {
     // Index.ets
     const event: calendarManager.Event = {
       // 日程标题
-      title: this.title,
+      title: this.title!,
       // 日程类型，不推荐三方开发者使用calendarManager.EventType.IMPORTANT，重要日程类型不支持一键服务跳转功能及无法自定义提醒时间
       type: calendarManager.EventType.NORMAL,
       // 日程开始时间
@@ -85,15 +89,30 @@ export struct TodoCreateFormView {
     // 待办完成的时候，待办删除的时候，都要移除日程
   }
   private handleSubmit= async ()=>{
+    if(!this.title) return
+
     try{
-      let id = await TodoViewModel.create({
-        title:this.title,
-        dueTime: this.time?formatDate(this.time):undefined,
-        memo: this.memo
-      })
+      if(this.detailData?.todoId){
+
+        await TodoViewModel.update({
+          todoId: this.detailData.todoId,
+          title:this.title,
+          isCompleted: this.checked,
+          dueTime: this.time?formatDate(this.time):undefined,
+          memo: this.memo
+        })
+      }
+      else {
+        let id = await TodoViewModel.create({
+          title:this.title,
+          dueTime: this.time?formatDate(this.time):undefined,
+          memo: this.memo
+        })
+      }
 
       EventManager.emit(EventTypes.FETCH_TODO_LIST)
-      this.handlePublishCalendar(id)
+      // this.handlePublishCalendar(id)
+      this.onSubmitSuccess()
     }
     catch(e) {
       console.log('222')
@@ -104,6 +123,10 @@ export struct TodoCreateFormView {
     //
     this.title = v
   }
+  private handleCheck=(checked:boolean)=>{
+    //
+    this.checked = checked
+  }
   @Monitor('detailData')
   handleDetailChange(){
     let item :TodoItemSimpleModel|null = null
@@ -111,6 +134,9 @@ export struct TodoCreateFormView {
     if(data){
       item = new TodoItemSimpleModel(data?.id,data?.todoId,data?.title,data?.createdTime
         ,data?.modifiedTime,data.isCompleted,data?.priority,data?.dueTime,data?.location,data?.memo)
+      this.memo = data.memo??null;
+      this.title = data.title;
+      this.time = data.dueTime?new Date(data.dueTime):null
     }
     this.myNodeController?.update(true,item)
   }
@@ -120,16 +146,39 @@ export struct TodoCreateFormView {
     let builderData:ICreateItemNodeBuilderProp = {
       item:null,
       isExpand:true,
-      onInput:this.handleInput
+      onInput:this.handleInput,
+      onCheck: this.handleCheck
     }
     let  node = createNode<TodoItemSimpleModel>(this.getUIContext(),builderData,this.wrapBuilder);
 
     this.myNodeController = node
   }
+  @Builder
+  sheetTitleBuilder(){
+    Text(this.sheetTitle).fontSize(20)
+  }
+  @Builder
+  submitBtnBuilder(){
+    SymbolGlyph($r('sys.symbol.checkmark')).fontSize(30)
+      .onClick(()=>{
+        this.handleSubmit()
+      })
+  }
   build() {
 
     Column({space: 15}){
-
+      CustomTitleBar({
+        onBackPress:()=>{
+          this.onCancel()
+        },
+        title:()=>{
+          //
+          this.sheetTitleBuilder()
+        },
+        extraContent:()=>{
+          this.submitBtnBuilder()
+        }
+      }).padding({left: 15,right: 15})
       Row(){
         NodeContainer(this.myNodeController)
       }.rowAttr()
@@ -154,6 +203,7 @@ export struct TodoCreateFormView {
           SymbolGlyph($r('sys.symbol.xmark_circle'))
             .fontSize(16).onClick(()=>{
             this.textController.deleteText()
+            this.title = null
           })
         }else {
 
@@ -174,12 +224,8 @@ export struct TodoCreateFormView {
         TextInput({text: $$this.memo,placeholder:'请输入备注',}).layoutWeight(1).backgroundColor(Color.Transparent)
       }.rowAttr()
 
-      Button($r('app.string.confirm')).width('90%').backgroundColor(Color.Blue).onClick(()=>{
-        this.handleSubmit()
-      })
 
     }
-    .margin({top: 15})
     .width('100%')
     .height('100%')
   }

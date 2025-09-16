@@ -60,6 +60,11 @@ struct TodoDetail {
     }).then((value)=>{
       if(value.index==1) {
         //
+        let id = this.detailData?.todoId!
+        TodoViewModel.delete([id]).then(()=>{
+          EventManager.emit(EventTypes.FETCH_TODO_LIST)
+          this.handleBack()
+        })
         //
         //
       }else {
@@ -88,13 +93,18 @@ struct TodoDetail {
           Column() {
 
             if(this.AnimationProperties.showDetailContent){
-              CustomTitleBar({onBackPress:this.handleBack})
-                .padding({left: 15,right: 15})
               TodoCreateFormView(
                 {
-                  detailData: this.detailData
+                  detailData: this.detailData,
+                  sheetTitle: '待办详情',
+                  onCancel:()=>{
+                    this.handleBack()
+                  },
+                  onSubmitSuccess:()=>{
+                    this.handleBack()
+                  }
                 }
-              )
+              ).layoutWeight(1)
               Row(){
                 SharePanel({targetViewComponentId:''})
                 SymbolGlyph($r('sys.symbol.trash')).fontSize(30).onClick(()=>{

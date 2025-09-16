@@ -10,17 +10,17 @@ const TAG: string = 'AnimationProperties';
 const DEVICE_BORDER_RADIUS: number = 34;
 const DEFAULT_COLOR = '#fff'
 // 将自定义一镜到底转场动画进行封装，其他界面也需要做自定义一镜到底转场的话，可以直接复用，减少工作量
-@Observed
+@ObservedV2
 export class AnimationProperties {
-  public navDestinationBgColor: ResourceColor = DEFAULT_COLOR
-  public translateX: number = 0;
-  public translateY: number = 0;
-  public scaleValue: number = 1;
-  public clipWidth: Dimension = 0;
-  public clipHeight: Dimension = 0;
-  public radius: number = 0;
-  public positionValue: number = 0;
-  public showDetailContent: boolean = false;
+  @Trace public navDestinationBgColor: ResourceColor = DEFAULT_COLOR
+  @Trace public translateX: number = 0;
+  @Trace public translateY: number = 0;
+  @Trace public scaleValue: number = 1;
+  @Trace public clipWidth: Dimension = 0;
+  @Trace public clipHeight: Dimension = 0;
+  @Trace public radius: number = 0;
+  @Trace public positionValue: number = 0;
+  @Trace public showDetailContent: boolean = false;
   private uiContext: UIContext;
 
   constructor(uiContext: UIContext) {

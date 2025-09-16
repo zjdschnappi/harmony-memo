@@ -29,8 +29,8 @@ export class TodoItemSimpleModel {
   @Trace priority?:number|null;
   @Trace dueTime?:string|null;
   @Trace location?:LocationModel;
-  @Trace memo?:string
-  constructor(id:string,todoId:string,title:string,createdTime:string,modifiedTime:string,isCompleted:boolean,priority?:number|null,dueTime?:string|null,location?:LocationModel,memo?:string) {
+  @Trace memo?:string|null
+  constructor(id:string,todoId:string,title:string,createdTime:string,modifiedTime:string,isCompleted:boolean,priority?:number|null,dueTime?:string|null,location?:LocationModel,memo?:string|null) {
     this.id = id;
     this.todoId = todoId;
     this.title = title;
@@ -58,7 +58,7 @@ export interface  ITodoDbEntityModel {
   latitude?:number;
   longitude?:number;
   radius?:number
-  memo?:string
+  memo?:string|null
 }
 
 
@@ -82,7 +82,7 @@ export interface ITodoDetailModel {
   modifiedTime: string;
   isCompleted: boolean;
   dueTime?: string;
-  memo?: string;
+  memo?: string|null;
   priority: number,
   location?: LocationModel
 
@@ -93,7 +93,7 @@ export interface ITodoCreateModel {
   title: string
   dueTime?:string;
   location?:LocationModel
-  memo?: string;
+  memo?: string|null;
 }
 
 export interface ITodoUpdateModel {
@@ -102,5 +102,5 @@ export interface ITodoUpdateModel {
   title: string
   dueTime?:string;
   location?:LocationModel
-  memo?: string;
+  memo?: string|null;
 }

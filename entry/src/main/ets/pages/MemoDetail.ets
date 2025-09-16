@@ -14,19 +14,19 @@ function MemoDetailBuilder(){
   MemoDetail()
 }
 
-@Component
+@ComponentV2
 struct MemoDetail {
   pageInfos:NavPathStack = new NavPathStack()
-  @State AnimationProperties: AnimationProperties = new AnimationProperties(this.getUIContext());
-  @State myNodeController: ItemNode | undefined = new ItemNode(false);
+  @Local AnimationProperties: AnimationProperties = new AnimationProperties(this.getUIContext());
+  @Local myNodeController: ItemNode | undefined = new ItemNode(false);
   private pageId: number = -1;
   private pageParams:ITransitionRouteParam = {id:'-1'}
   private shouldDoDefaultTransition: boolean = false;
   private prePageDoFinishTransition: (() => void) = () => {};
   private itemRectInfo: RectInfoInPx = new RectInfoInPx();
 
-  @StorageProp('windowSizeChanged') @Watch('unRegisterNavParam') windowSizeChangedTime: number = 0;
-  @StorageProp('onConfigurationUpdate') @Watch('unRegisterNavParam') onConfigurationUpdateTime: number = 0;
+  // @StorageProp('windowSizeChanged') @Watch('unRegisterNavParam') windowSizeChangedTime: number = 0;
+  // @StorageProp('onConfigurationUpdate') @Watch('unRegisterNavParam') onConfigurationUpdateTime: number = 0;
 
 
   private unRegisterNavParam(): void {

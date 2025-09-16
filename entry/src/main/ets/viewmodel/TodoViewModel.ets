@@ -4,20 +4,20 @@ import { ITodoCreateModel, ITodoDetailModel,
 
 class TodoViewModel {
   // 创建新待办
-  async create(data:ITodoCreateModel): Promise<number> {
+  async create(data:ITodoCreateModel): Promise<string> {
 
 
-    return await TodoRepository.createMemo(data);
+    return await TodoRepository.create(data);
   }
 
   // 更新备忘录内容
-  async updateMemo(data:ITodoUpdateModel): Promise<string> {
+  async update(data:ITodoUpdateModel): Promise<string> {
     return await TodoRepository.update(data);
   }
 
   // 切换置顶状态
-  async toggleCompleted(id: string): Promise<boolean> {
-    return await TodoRepository.toggleCompleted(id);
+  async toggleCompleted(id: string,checked:boolean): Promise<boolean> {
+    return await TodoRepository.toggleCompleted(id,checked);
   }
 
   async getDetailById(id: string): Promise<ITodoDetailModel|null> {
@@ -38,8 +38,8 @@ class TodoViewModel {
 
 
   // 获取置顶备忘录
-  async getCompletedMemos(): Promise<ITodoListItemModel[]> {
-    let result = await TodoRepository.getCompletedMemos();
+  async getCompletedTodos(): Promise<ITodoListItemModel[]> {
+    let result = await TodoRepository.getCompletedTodos();
     return this.convert2SimpleList(result)
   }
   //

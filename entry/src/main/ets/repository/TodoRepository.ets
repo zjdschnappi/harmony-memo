@@ -6,9 +6,9 @@ import { formatDate } from '../utils/DateUtil';
 
 class TodoRepository {
   // 创建新备忘录
-  async createMemo(content: ITodoCreateModel): Promise<number> {
+  async create(content: ITodoCreateModel): Promise<string> {
     if (!content.title.trim()) {
-      throw new Error('备忘录标题不能为空');
+      throw new Error('待办不能为空');
     }
 
     const bizId = this.generateBizId();
@@ -20,11 +20,12 @@ class TodoRepository {
       modifiedTime: formatDate(new Date()),
       dueTime: content.dueTime,
       location: content.location,
-      priority: PriorityLevel.NORMAL
+      priority: PriorityLevel.NORMAL,
+      memo: content.memo
     };
 
     const id = await TodoDao.insert(todo);
-    return id;
+    return bizId;
   }
 
   // 更新待办内容
@@ -48,13 +49,13 @@ class TodoRepository {
   }
 
   // 切换完成状态
-  async toggleCompleted(id: string): Promise<boolean> {
+  async toggleCompleted(id: string,checked:boolean): Promise<boolean> {
     const todo = await TodoDao.getById(id);
     if (!todo) {
       throw new Error('找不到待办');
     }
 
-    todo.isCompleted = !todo.isCompleted;
+    todo.isCompleted = checked
 
     await TodoDao.update(todo as ITodoUpdateModel);
     return true;
@@ -89,7 +90,7 @@ class TodoRepository {
   }
 
   // 获取置顶备忘录
-  async getCompletedMemos(): Promise<ITodoDetailModel[]> {
+  async getCompletedTodos(): Promise<ITodoDetailModel[]> {
     return await TodoDao.getCompleted();
   }
 
