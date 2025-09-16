@@ -114,7 +114,7 @@ export default struct TodoView {
               end: endBuilder(item)
             })
           },(item:TodoItemSimpleModel)=>{
-            return item.id
+            return item.todoId
           })
         }
         .height('100%')

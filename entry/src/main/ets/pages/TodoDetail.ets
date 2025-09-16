@@ -5,27 +5,31 @@ import { ITransitionRouteParam } from '../types'
 import { RectInfoInPx } from '../utils/ComponentAttrUtils'
 import { CustomTitleBar } from '../components/CustomTitleBar';
 import { SharePanel } from '../components/SharePanel';
-import EventManager, { EventTypes } from '../utils/EventManager';
 import { TodoCreateFormView } from '../components/TodoCreateFormView';
+import TodoViewModel from '../viewmodel/TodoViewModel'
+import EventManager, { EventTypes } from '../utils/EventManager'
+import { ITodoDetailModel } from '../model/Todo';
 
 @Builder
 function TodoDetailBuilder(){
   TodoDetail()
 }
 
-@Component
+@ComponentV2
 struct TodoDetail {
   pageInfos:NavPathStack = new NavPathStack()
-  @State AnimationProperties: AnimationProperties = new AnimationProperties(this.getUIContext());
-  @State myNodeController: ItemNode | undefined = new ItemNode(false);
+  @Local AnimationProperties: AnimationProperties = new AnimationProperties(this.getUIContext());
+  @Local myNodeController: ItemNode | undefined = new ItemNode(false);
+  @Local detailData: ITodoDetailModel|null = null
   private pageId: number = -1;
   private pageParams:ITransitionRouteParam = {id:'-1'}
   private shouldDoDefaultTransition: boolean = false;
   private prePageDoFinishTransition: (() => void) = () => {};
   private itemRectInfo: RectInfoInPx = new RectInfoInPx();
 
-  @StorageProp('windowSizeChanged') @Watch('unRegisterNavParam') windowSizeChangedTime: number = 0;
-  @StorageProp('onConfigurationUpdate') @Watch('unRegisterNavParam') onConfigurationUpdateTime: number = 0;
+  // todo v2版不支持StorageProp
+  // @StorageProp('windowSizeChanged') @Watch('unRegisterNavParam') windowSizeChangedTime: number = 0;
+  // @StorageProp('onConfigurationUpdate') @Watch('unRegisterNavParam') onConfigurationUpdateTime: number = 0;
 
 
   private unRegisterNavParam(): void {
@@ -71,6 +75,12 @@ struct TodoDetail {
   private handleBack = () =>{
     this.onBackPressed()
   }
+  private handleGetDetail=(id:string)=>{
+    TodoViewModel.getDetailById(id).then(data=>{
+        this.detailData = data
+    })
+  }
+
   build() {
     NavDestination() {
       Stack({alignContent:Alignment.Start}){
@@ -80,7 +90,11 @@ struct TodoDetail {
             if(this.AnimationProperties.showDetailContent){
               CustomTitleBar({onBackPress:this.handleBack})
                 .padding({left: 15,right: 15})
-              TodoCreateFormView()
+              TodoCreateFormView(
+                {
+                  detailData: this.detailData
+                }
+              )
               Row(){
                 SharePanel({targetViewComponentId:''})
                 SymbolGlyph($r('sys.symbol.trash')).fontSize(30).onClick(()=>{
@@ -119,6 +133,8 @@ struct TodoDetail {
       this.pageParams = param
       this.myNodeController = getNode(param.id);
       this.myNodeController?.update(true)
+
+      this.handleGetDetail(param.id)
       let noop = ()=>{}
       this.prePageDoFinishTransition = param.doDefaultTransition||noop
       this.itemRectInfo = param.itemRectInfo as RectInfoInPx

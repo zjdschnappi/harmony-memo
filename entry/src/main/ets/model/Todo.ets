@@ -75,6 +75,7 @@ export interface ITodoListItemModel {
 }
 
 export interface ITodoDetailModel {
+  id: string
   todoId: string;
   title: string;
   createdTime: string;

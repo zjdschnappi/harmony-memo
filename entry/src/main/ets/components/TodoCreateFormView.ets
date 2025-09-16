@@ -4,7 +4,7 @@ import { DateTimePickerParam, TimeFormat } from "./DateTimePicker/DateTimePicker
 import { calendarManager } from "@kit.CalendarKit";
 import { BusinessError } from '@kit.BasicServicesKit';
 import { createNode, ItemNode } from "./ItemNode";
-import { TodoItemSimpleModel } from "../model/Todo";
+import { ITodoDetailModel, TodoItemSimpleModel } from "../model/Todo";
 import { ICreateItemNodeBuilderProp, TodoItemBuilder } from "./TodoItem";
 import TodoViewModel from '../viewmodel/TodoViewModel'
 import EventManager, { EventTypes } from '../utils/EventManager'
@@ -28,6 +28,7 @@ export struct TodoCreateFormView {
   @Local time:Date|null = null;
   @Local myNodeController: ItemNode<TodoItemSimpleModel> | undefined = new ItemNode(false);
   @Param onSubmitSuccess:()=>void = ()=>{}
+  @Param detailData: ITodoDetailModel|null = null
   private textController:TextInputController = new TextInputController()
   private wrapBuilder = wrapBuilder(TodoItemBuilder)
   private openDateTimePicker = ( onConfirm: (selectedDate: Date) => void) => {
@@ -102,6 +103,16 @@ export struct TodoCreateFormView {
   private handleInput=(v:string)=>{
     //
     this.title = v
+  }
+  @Monitor('detailData')
+  handleDetailChange(){
+    let item :TodoItemSimpleModel|null = null
+    let data = this.detailData;
+    if(data){
+      item = new TodoItemSimpleModel(data?.id,data?.todoId,data?.title,data?.createdTime
+        ,data?.modifiedTime,data.isCompleted,data?.priority,data?.dueTime,data?.location,data?.memo)
+    }
+    this.myNodeController?.update(true,item)
   }
 
   aboutToAppear(): void {

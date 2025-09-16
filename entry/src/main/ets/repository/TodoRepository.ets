@@ -12,7 +12,7 @@ class TodoRepository {
     }
 
     const bizId = this.generateBizId();
-    const todo: ITodoDetailModel = {
+    const todo: Partial<ITodoDetailModel> = {
       todoId:bizId,
       title:content.title,
       isCompleted: false,

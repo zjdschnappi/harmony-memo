@@ -10,13 +10,13 @@ const TABLE_NAME = 'todos'
 
 class TodoDao {
   // 插入备忘录
-  async insert(item: ITodoDetailModel): Promise<number> {
+  async insert(item: Partial<ITodoDetailModel>): Promise<number> {
     const store = await Database.getRdbStore();
     const now = Date.now();
 
     const valueBucket:ITodoDbEntityModel= {
-      todo_id: item.todoId,
-      title: item.title,
+      todo_id: item.todoId!,
+      title: item.title!,
 
       is_completed: item.isCompleted ? 1 : 0,
 
@@ -150,7 +150,7 @@ class TodoDao {
     const todos: ITodoDetailModel[] = [];
     try{
       while (result.goToNextRow()) {
-        // const id = result.getLong(result.getColumnIndex('id'));
+        const id = result.getLong(result.getColumnIndex('id'));
         const todoId = result.getString(result.getColumnIndex('todo_id'));
         const title = result.getString(result.getColumnIndex('title'));
         const isCompleted = result.getLong(result.getColumnIndex('is_completed')) === 1;
@@ -167,6 +167,7 @@ class TodoDao {
 
 
         todos.push({
+          id:String(id),
           title,
           todoId,
           isCompleted,

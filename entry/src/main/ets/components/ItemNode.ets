@@ -56,12 +56,15 @@ export class ItemNode<T extends CommonNode = CommonNode> extends NodeController 
     this.node.build(this.wrapBuilder, builderData)
   }
 
-  update(isExpand: boolean) {
+  update(isExpand: boolean,item?:T|null) {
     if (this.node !== null) {
       // 调用update进行更新。
       if(this.builderData){
 
         this.builderData.isExpand = isExpand
+        if(item){
+          this.builderData.item = item
+        }
       }
       this.node.update(this.builderData);
     }
