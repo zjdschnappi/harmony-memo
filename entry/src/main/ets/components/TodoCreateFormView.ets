@@ -67,7 +67,7 @@ export struct TodoCreateFormView {
   handlePublishCalendar(id:string){
 
     if(this.storageFromDisk.has(id)){
-      if(!this.time){
+      if(!this.time||this.checked){
         this.calendar?.deleteEvent(this.storageFromDisk.get(id)as number)
         return
       }
