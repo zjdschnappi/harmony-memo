@@ -69,6 +69,8 @@ export struct TodoCreateFormView {
     if(this.storageFromDisk.has(id)){
       if(!this.time||this.checked){
         this.calendar?.deleteEvent(this.storageFromDisk.get(id)as number)
+
+        this.storageFromDisk.delete(id)
         return
       }
     }
@@ -229,8 +231,6 @@ export struct TodoCreateFormView {
         }
       }
       .rowAttr()
-
-
       Row(){
         Text('位置提醒')
         TextInput({placeholder:'请选择提醒位置',}).focusable(false).layoutWeight(1).backgroundColor(Color.Transparent)
