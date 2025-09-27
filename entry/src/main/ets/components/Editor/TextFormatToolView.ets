@@ -26,6 +26,7 @@ export struct TextFormatToolView {
   @Local paragraphStyle:ParagraphStyle = new ParagraphStyle()
   @Local selectionRange: RichEditorRange = {start:0,end:0}
   @Param controller: RichEditorController = new RichEditorController()
+  @Local presetTypingStyles:RichEditorTextStyle = {}
   @Consumer() historyManager:EditorHistoryManager = new EditorHistoryManager(this.controller)
 
 
@@ -38,7 +39,7 @@ export struct TextFormatToolView {
     EventManager.on(EventTypes.EDITOR_ABOUT_TO_INPUT,(e)=>{
       let value = e.data?.data as RichEditorInsertValue
       let command = new InsertTextCommand(value.insertValue,{
-        style: this.getTypingStyles({})
+        style: this.presetTypingStyles
       })
       this.historyManager.executeCommand(command)
     })
@@ -71,16 +72,22 @@ export struct TextFormatToolView {
                 case 'underline':{
                   styles.isUnderline = !this.isUnderline
                   this.isUnderline=!this.isUnderline
+                  this.presetTypingStyles.decoration =this.isUnderline? {
+                    type: TextDecorationType.Underline,
+                    style:TextDecorationStyle.SOLID
+                  }:undefined
                   break
                 }
                 case 'italic':{
                   styles.isItalic = !this.isItalic
                   this.isItalic = !this.isItalic
+                  this.presetTypingStyles.fontStyle = this.isItalic? FontStyle.Italic:FontStyle.Normal
                   break
                 }
                 case 'bold':{
                   styles.isBold = !this.isBold
                   this.isBold = !this.isBold
+                  this.presetTypingStyles.fontWeight = this.isBold? FontWeight.Bold:FontWeight.Normal
                   break
                 }
 
@@ -138,7 +145,7 @@ export struct TextFormatToolView {
         ForEach(this.colorItems(),(item:ITextColorItem)=>{
           this.colorItem({color:item.color,onClick:(item:Color|string)=>{
             this.textColor = item
-
+            this.presetTypingStyles.fontColor = item
             let command = new FormatTextCommand(this.selectionRange.start,this.selectionRange.end,this.getTypingStyles({textColor:item}),()=>{
               //
             })
@@ -170,7 +177,7 @@ export struct TextFormatToolView {
         })
           .onChange((v)=>{
             this.fontSize = v
-
+            this.presetTypingStyles.fontSize = v
             let command = new FormatTextCommand(this.selectionRange.start,this.selectionRange.end,this.getTypingStyles({fontSize:v}),()=>{
               //
             })

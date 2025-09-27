@@ -10,6 +10,7 @@ export abstract class EditorCommand {
 // 2. 插入文本命令
 export class InsertTextCommand extends EditorCommand {
   private text: string;
+  private prevStyle:RichEditorTextStyle={};
   private prevOffset:number|null = 0;
   private curOffset:number|null = 0
   private options:RichEditorTextSpanOptions
@@ -17,14 +18,16 @@ export class InsertTextCommand extends EditorCommand {
   constructor(text: string,options:RichEditorTextSpanOptions) {
     super();
     this.text = text;
-    this.options = options
+    this.options = JSON.parse(JSON.stringify(options))
 
   }
 
   execute(controller: RichEditorController){
     // 移动到插入位置并插入文本
     this.prevOffset = controller.getCaretOffset()
+    this.prevStyle = controller.getTypingStyle()
     this.options.offset = this.prevOffset
+    // this.options.style = this.prevStyle
     controller.addTextSpan(this.text,this.options);
     this.curOffset = controller.getCaretOffset()
 
@@ -62,7 +65,7 @@ export class FormatTextCommand extends EditorCommand{
     this.startOffset = start;
     this.endOffset = end;
     this.undoCallback = this.undoCallback
-    this.curStyle = style
+    this.curStyle = JSON.parse(JSON.stringify(style))
   }
   execute(controller: RichEditorController){
     if(this.startOffset<this.endOffset){
@@ -123,7 +126,7 @@ export class InsertImgCommand extends EditorCommand {
   constructor(imgValue: image.PixelMap | ResourceStr,options:RichEditorImageSpanOptions) {
     super();
     this.imgValue = imgValue;
-    this.options = options
+    this.options = JSON.parse(JSON.stringify(options))
 
   }
 
