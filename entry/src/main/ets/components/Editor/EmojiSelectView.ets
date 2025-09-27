@@ -1,12 +1,11 @@
 import { EmojiData, EmojiModel } from "../../model/Memo";
 import { EmojiDetail } from "./EmojiDetail";
-
 // 表情键盘
-@Component
+@ComponentV2
 export struct EmojiSelectView {
-  onEmojiSelect:(item:Resource)=>void=()=>{}
-  msgFontSize: number = 0;
-  @State show:boolean = false;
+  @Param onEmojiSelect:(item:Resource)=>void=()=>{}
+  private msgFontSize: number = 0;
+  @Local show:boolean = false;
 
   @Builder
   customBuilder(){
@@ -23,6 +22,7 @@ export struct EmojiSelectView {
         }
         .onClick(()=>{
           this.onEmojiSelect(item.imgSrc)
+
         })
         .id('faceGridId')
       })

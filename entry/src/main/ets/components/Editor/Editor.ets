@@ -3,6 +3,8 @@ import { EmojiSelectView } from "./EmojiSelectView";
 import { PhotoSelectView } from "./PhotoSelectView";
 import { TextFormatToolView } from "./TextFormatToolView";
 import EventManager , { EventTypes } from '../../utils/EventManager'
+import { InsertImgCommand } from "./Command";
+import { EditorHistoryManager } from "./HistoryManager";
 
 @ComponentV2
 export struct Editor {
@@ -10,7 +12,7 @@ export struct Editor {
 
   @Param isFocusable: boolean = true
   @Param showToolBar:boolean = true
-
+  @Consumer() historyManager:EditorHistoryManager = new EditorHistoryManager(this.editorOptions.controller)
 
 
   build(){
@@ -18,6 +20,7 @@ export struct Editor {
     Column(){
 
       RichEditor(this.editorOptions)
+
         .placeholder('写点什么吧...')
         .height('100%')
         .caretColor(Color.Orange)
@@ -44,19 +47,26 @@ export struct Editor {
             ListItem(){
               EmojiSelectView({
                 onEmojiSelect:(url)=>{
-                  this.editorOptions.controller.addImageSpan(url, {
+                  let command = new InsertImgCommand(url,{
                     imageStyle: {
                       size: [30, 30], // 3.2 调整表情在输入框中的尺寸
                       verticalAlign: ImageSpanAlignment.CENTER,
                       layoutStyle: { margin: {right:1} }
                     }
-                  });
+                  })
+                  this.historyManager.executeCommand(command)
                 }
               })
             }
             ListItem(){
               PhotoSelectView({onImgSelect:(urls)=>{
-                this.editorOptions.controller.addImageSpan(urls[0])
+                let command = new InsertImgCommand(urls[0],{
+                  imageStyle: {
+                    verticalAlign: ImageSpanAlignment.CENTER,
+                    layoutStyle: { margin: {right:1} }
+                  }
+                })
+                this.historyManager.executeCommand(command)
               }})
             }
           }.listDirection(Axis.Horizontal).alignListItem(ListItemAlign.Center).padding({left:15,right:15})

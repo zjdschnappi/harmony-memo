@@ -49,6 +49,7 @@ export struct MemoDetailView {
           })
         }
       })
+      this.editorOptions.controller.setCaretOffset(0)
     })
   }
 

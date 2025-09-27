@@ -1,3 +1,5 @@
+import image from "@ohos.multimedia.image";
+
 // 1. 抽象命令基类
 export abstract class EditorCommand {
   abstract execute(controller: RichEditorController)
@@ -22,6 +24,7 @@ export class InsertTextCommand extends EditorCommand {
   execute(controller: RichEditorController){
     // 移动到插入位置并插入文本
     this.prevOffset = controller.getCaretOffset()
+    this.options.offset = this.prevOffset
     controller.addTextSpan(this.text,this.options);
     this.curOffset = controller.getCaretOffset()
 
@@ -107,4 +110,42 @@ export class FormatTextCommand extends EditorCommand{
       controller.setTypingStyle(this.prevStyle)
     }
   }
+}
+
+
+// 插入图片命令
+export class InsertImgCommand extends EditorCommand {
+  private imgValue: image.PixelMap | ResourceStr;
+  private prevOffset:number|null = 0;
+  private curOffset:number|null = 0
+  private options:RichEditorImageSpanOptions
+
+  constructor(imgValue: image.PixelMap | ResourceStr,options:RichEditorImageSpanOptions) {
+    super();
+    this.imgValue = imgValue;
+    this.options = options
+
+  }
+
+  execute(controller: RichEditorController){
+    // 移动到插入位置并插入文本
+    this.prevOffset = controller.getCaretOffset()
+    this.options.offset = this.prevOffset
+    controller.addImageSpan(this.imgValue,this.options);
+    this.curOffset = controller.getCaretOffset()
+
+  }
+
+  undo(controller: RichEditorController) {
+    // 计算要删除的范围
+    const start = this.prevOffset;
+    const end = this.curOffset
+
+    // 删除插入的文本
+    controller.deleteSpans({start:start,end:end});
+
+    // 恢复原始光标位置
+    controller.setCaretOffset(start);
+  }
+
 }
