@@ -5,6 +5,7 @@ import {  MemoSimpleListItemModel } from '../model/Memo';
 import { ITransitionRouteParam } from '../types';
 import { CustomTransition } from '../customTransition/CustomNavigationUtils';
 import EventManager, { EventTypes } from '../utils/EventManager'
+import { LoadingView } from '../components/LoadingView';
 
 /**
  * 同步两个数组数据
@@ -97,6 +98,7 @@ struct Home {
   @Consumer() pagePathStackInfos:NavPathStack = new NavPathStack()
   @Local sidebarOpen:boolean = false
   @Local currentTab:number = 0
+  private loadingView = new LoadingView()
 
   private pageId: number = -1;
 
@@ -112,17 +114,25 @@ struct Home {
       .borderRadius(20)
   }
   aboutToAppear(){
+
     EventManager.on(EventTypes.FETCH_MEMO_LIST,()=>{
       this.getMemoList()
+
     })
   }
   aboutToDisappear(): void {
     EventManager.off(EventTypes.FETCH_MEMO_LIST)
   }
-  getMemoList(){
-    MemoViewModel.getActiveMemos().then((data)=> {
-      syncArrays(this.list,data)
-    })
+  getMemoList=()=>{
+
+    this.loadingView.showLoading()
+    setTimeout(()=>{
+      // 模拟接口
+      MemoViewModel.getActiveMemos().then((data)=> {
+        syncArrays(this.list,data)
+        this.loadingView.hide()
+      })
+    },500)
   }
   build() {
     NavDestination(){
