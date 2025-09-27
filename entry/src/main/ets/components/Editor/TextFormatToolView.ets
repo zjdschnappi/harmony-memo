@@ -324,7 +324,7 @@ export struct TextFormatToolView {
     let textDecorateStyleSet:Set<TextDecorationType> = new Set()
     let paragraphTypeSet:Set<TextAlign> = new Set()
 
-    spans.forEach((item)=>{
+    spans?.forEach((item)=>{
       let span = item as RichEditorImageSpanResult
       if(typeof span.imageStyle!=='undefined'){
         //
